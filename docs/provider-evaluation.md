@@ -3,11 +3,21 @@
 **Status:** Research pending; no provider selected  
 **Last checked:** 2026-10-21
 
+## User requirements and provisional ingestion choice
+
+- Region: Zimbabwe. The user marked this “Allowed / Not Applicable”; this is user-provided context, not confirmation that a particular provider permits Zimbabwean accounts or API access.
+- Use: personal research, with data stored for personal use.
+- Budget: $0.
+- Bid/ask: not required for the initial research workflow.
+- Trading style: intraday analysis; no order execution is implemented.
+- **Provisional choice: polling, not streaming.** Streaming is not needed for non-executing intraday research and adds connection/reconnect complexity. Start with a conservative 15-minute polling cadence, subject to the selected provider’s documented free-tier quotas and permitted use. This is a product decision, not a claim that a provider allows that cadence.
+- Candle intervals and history depth remain provider/plan-gated. Prefer useful intraday bars and request the maximum history the verified zero-cost tier permits; never claim historical coverage until demonstrated.
+
 ## Current repository and research status
 
 The project requires real quotes and historical candles for XAU/USD, EUR/USD, and GBP/USD. Price freshness, bid/ask fields, streaming, historical depth, cost, quotas, production terms, and permission to store/display data must be verified for the exact account region and plan.
 
-Official vendor pages could not be retrieved in this session because outbound DNS lookups failed. The links below are starting points for a future review, not sources verified during this assessment. No current coverage, price, quota, latency, or licensing claim is made here.
+Official vendor pages could not be retrieved in this session because outbound DNS lookups failed, including during the latest review after the user clarified requirements. The links below are starting points for a future review, not sources verified during this assessment. No current coverage, price, quota, latency, Zimbabwe eligibility, or licensing claim is made here.
 
 ## Candidate research queue
 
@@ -43,8 +53,10 @@ Before choosing a provider:
 - Confirm licensing for the application's personal use, display, and persistence.
 - Verify API access is available for the user's region and account.
 
-No test requests or provider integration were performed in Phase 0. Credentials and subscriptions are not present in the repository.
+No test requests or provider integration were performed. Credentials and subscriptions are not present in the repository.
 
 ## Phase 2 acceptance gate
 
 Selection is complete only when coverage and plan terms are documented and the integration demonstrates real, timestamped values for all required instruments; stale/missing/error paths are surfaced; no mock fallback occurs; and terms permit the intended use. Provider selection alone is not evidence that the integration works.
+
+Until this gate passes, no provider is selected and the application must show market data as unavailable rather than substitute fixture, generated, or stale values.

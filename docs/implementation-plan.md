@@ -1,7 +1,7 @@
 # Implementation plan
 
-**Current phase:** Phase 1 — Project foundation
-**Status:** Phase 0 documents are in place. Phase 1 foundation is implemented; provider research remains open and Phase 2 has not started.
+**Current phase:** Phase 2 — Real market data (provider gate pending)
+**Status:** Phase 1 foundation is implemented. User requirements are recorded and provider-neutral validated contracts are in place; no eligible free provider is verified, so real data ingestion has not started.
 
 ## Repository assessment
 
@@ -47,8 +47,7 @@ Verified in this workspace: frozen pnpm install, lint, typecheck, all 6 API test
 
 ## Open questions and risks
 
-- Which market-data vendor/account/region and plan can provide the required instruments and permitted data use?
-- Is bid/ask and streaming required for the first data slice, or are documented REST quote/candles sufficient?
+- Which provider's free tier covers all required instruments and permits personal storage/display for a Zimbabwe user?
 - What hosting, authentication, secrets manager, domain, and MongoDB deployment are intended?
 - Which timezone should the UI default to? The master prompt suggests `Africa/Harare`, but this has not been confirmed as a user requirement.
 - Which news, economic-calendar, AI, and charting providers are acceptable under cost and licensing constraints?
@@ -58,6 +57,14 @@ Verified in this workspace: frozen pnpm install, lint, typecheck, all 6 API test
 
 - Inspected repository files and Git state after syncing `main`.
 - Read the master prompt and confirmed the requested Phase 0 outputs.
-- Attempted to retrieve vendor official docs; DNS lookup failed for each site. Provider coverage, prices, quotas, freshness, and licensing are explicitly unverified.
+- Attempted to retrieve vendor official docs again after requirements were clarified; DNS lookup failed. Provider coverage, prices, quotas, Zimbabwe eligibility, freshness, and storage/display rights remain unverified.
 - Phase 1 local validation: `pnpm lint`, `pnpm typecheck`, `pnpm test` (6 passing), `pnpm build`, frozen install, Mongo-backed readiness, and web/API health smoke checks all passed.
 - CI workflow has been committed locally but has not yet been observed running remotely.
+
+## Phase 2 progress and constraints
+
+- User requirements: Zimbabwe (user-marked allowed/not applicable), personal use with stored data, $0 budget, bid/ask not required.
+- Provisional ingestion decision: REST polling, not streaming. Intraday research does not need an always-on connection; use a conservative 15-minute cadence only if an eventual free plan's official limits permit it.
+- Candle intervals/history depth are not selected until a provider's free plan is verified. Aim for useful intraday bars and as much permitted history as quotas and storage rights allow.
+- Added provider-neutral Zod contracts for UTC timestamped quotes and OHLC candles. Prices remain decimal strings; optional bid/ask are validated if supplied; volume is optional because it may be unavailable for OTC instruments.
+- **Blocked:** official provider sources could not be retrieved due DNS failures. No provider can yet be verified for XAU/USD + EUR/USD + GBP/USD, free quotas, Zimbabwe account/API eligibility, or permission to retain and display stored data. There is no adapter, credential, or market-data route, and no fabricated values are used.
