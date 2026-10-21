@@ -1,0 +1,20 @@
+{
+  "name": "ai-trading-command-centre",
+  "private": true,
+  "packageManager": "pnpm@10.34.7",
+  "engines": {
+    "node": ">=22.9.0"
+  },
+  "scripts": {
+    "dev": "pnpm --parallel --filter @atcc/web --filter @atcc/api dev",
+    "build": "pnpm --filter @atcc/api build && pnpm --filter @atcc/web build",
+    "lint": "pnpm --filter @atcc/api lint && pnpm --filter @atcc/web lint",
+    "typecheck": "pnpm --filter @atcc/api typecheck && pnpm --filter @atcc/web typecheck",
+    "test": "pnpm --filter @atcc/api test"
+  },
+  "devDependencies": {
+    "@eslint/js": "9.39.5",
+    "eslint": "9.39.5",
+    "typescript-eslint": "8.72.0"
+  }
+}
