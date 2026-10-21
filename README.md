@@ -15,7 +15,7 @@ A research-first foundation for market data, analysis, and trade planning for XA
 ```sh
 corepack enable
 corepack prepare pnpm@10.34.7 --activate
-cp .env.example .env
+cp -n .env.example .env
 docker compose up -d mongodb
 pnpm install --frozen-lockfile
 pnpm dev
