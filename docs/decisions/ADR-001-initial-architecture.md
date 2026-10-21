@@ -1,6 +1,6 @@
 # ADR-001: Initial architecture
 
-- **Status:** Proposed; pending user review
+- **Status:** Accepted for the Phase 1 foundation; provider and production choices remain open
 - **Date:** 2026-10-21
 
 ## Context
@@ -9,7 +9,7 @@ The repository currently contains project documentation only. The intended produ
 
 ## Decision proposal
 
-Use a TypeScript modular monolith with a pnpm workspace, a Next.js web app, a separate Node.js API (Fastify is the provisional candidate), and MongoDB. Keep provider integrations behind server-side interfaces and keep domain/risk logic independent of vendors and AI. Add only packages and services needed by implemented features; do not create empty modules to match a target diagram.
+Use a TypeScript modular monolith with a pnpm workspace, a Next.js web app, a separate Node.js API (Fastify), and MongoDB. Keep provider integrations behind server-side interfaces and keep domain/risk logic independent of vendors and AI. Add only packages and services needed by implemented features; do not create empty modules to match a target diagram.
 
 For the initial API contracts and environment validation, evaluate a runtime schema library such as Zod. Select test tooling and charting only after implementation scope and current licensing are checked. Do not pin dependency versions or add dependencies in this architecture-only milestone.
 
@@ -19,7 +19,7 @@ This follows the stated stack preferences while keeping the first release small 
 
 ## Consequences
 
-- No executable setup is established by this ADR; stack choices remain pending review.
+- Phase 1 provides executable web/API scaffolding, but not a complete trading application.
 - Provider, AI, news, calendar, charting, hosting, authentication, and job-scheduling choices remain open.
 - Phase 1 must prove a reproducible local setup, health checks, environment validation, logging, persistence connectivity, and CI before market-data integration.
 - No broker integration or live order route is authorized.

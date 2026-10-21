@@ -1,35 +1,52 @@
 # AI Trading Command Centre
 
-A planned research-first platform for market data, technical and macro analysis, trade planning, risk controls, and paper trading for XAU/USD, EUR/USD, and GBP/USD.
+A research-first foundation for market data, analysis, and trade planning for XAU/USD, EUR/USD, and GBP/USD. The current milestone provides a Next.js web shell and a Node.js API foundation; it does not yet retrieve market data or implement trading.
 
-> This repository is in Phase 0 (discovery and architecture). It does not yet contain a runnable application, verified market-data integration, or trading functionality. Live execution is out of scope and must remain disabled unless separately implemented, validated, and explicitly approved.
+> Live execution is not implemented. Initial operation is research-only; do not treat generated or external information as a trading signal.
 
-## Project status
+## Requirements
 
-The repository currently contains project documentation only. Provider selection is pending verification of instrument coverage, data freshness, history, bid/ask availability, cost, limits, and licensing against current vendor documentation.
+- Node.js 22.9 or newer (a supported Node 22 release is recommended).
+- Corepack and pnpm 10.34.7.
+- Docker Compose for the local MongoDB service.
 
-## Documentation
+## Local setup
 
-- [Master project prompt](COPILOT_MASTER_PROMPT.md)
-- [System design](docs/architecture/system-design.md)
-- [Data flow](docs/architecture/data-flow.md)
-- [Security model](docs/architecture/security-model.md)
-- [Initial architecture decision](docs/decisions/ADR-001-initial-architecture.md)
-- [Provider evaluation](docs/provider-evaluation.md)
-- [Implementation plan](docs/implementation-plan.md)
+```sh
+corepack enable
+corepack prepare pnpm@10.34.7 --activate
+cp .env.example .env
+docker compose up -d mongodb
+pnpm install --frozen-lockfile
+pnpm dev
+```
 
-## Planned development setup
+Open the web app at <http://localhost:3000>. The API listens on `127.0.0.1:4000` by default:
 
-No package manager, application scripts, environment variables, database configuration, or tests have been added yet. Do not run the intended commands from the master prompt until they are implemented and documented here.
+- `GET /health` is a liveness check and does not imply that dependencies are available.
+- `GET /ready` pings MongoDB and returns HTTP 503 if the database is missing or unavailable.
+- The web app health endpoint is `GET /api/health`.
 
-The proposed foundation is a TypeScript workspace with a Next.js web application, a Node.js API, and MongoDB. These choices remain proposals pending review; no dependencies or credentials are required for the current documentation-only milestone.
+The Compose MongoDB service is for local development only. It has no authentication and binds its host port to loopback; do not expose it to a network or reuse this configuration in production. `MONGODB_URI`, `API_HOST`, and `API_PORT` may be changed in the ignored root `.env` file. Environment configuration is validated at API startup, and credentials must never be committed or sent to the browser.
 
-## Operating principles
+## Quality checks
 
-- Begin in research mode; add paper trading only after deterministic risk and simulation tests.
-- Use verified data with provider attribution and timestamps; surface missing or stale data rather than substituting mock values.
-- Keep secrets server-side and financial arithmetic deterministic.
-- Never represent AI output or historical performance as a guarantee.
-- Do not implement or enable live order execution without separate approval and validation.
+Run from the repository root:
 
-See the [implementation plan](docs/implementation-plan.md) for proposed phases and acceptance criteria.
+```sh
+pnpm lint
+pnpm typecheck
+pnpm test
+pnpm build
+```
+
+GitHub Actions runs the same checks on pushes and pull requests. Current automated tests cover API environment validation, liveness, and fail-closed readiness behavior; they do not prove live provider reliability.
+
+## Current limitations
+
+- No market-data, news, calendar, AI, charting, authentication, or broker integration is configured.
+- Provider evaluation remains open pending verifiable coverage, freshness, rate limits, cost, and licensing evidence.
+- Database persistence is not yet implemented; the API readiness endpoint only checks connectivity.
+- There are no trading features. Financial calculations, paper trading, and live execution are future phases and require separate validation.
+
+See the [implementation plan](docs/implementation-plan.md), [system design](docs/architecture/system-design.md), and [master project prompt](COPILOT_MASTER_PROMPT.md).

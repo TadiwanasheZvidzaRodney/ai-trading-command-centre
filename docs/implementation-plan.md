@@ -1,11 +1,11 @@
 # Implementation plan
 
-**Current phase:** Phase 0 — Discovery and architecture  
-**Status:** Repository assessment and proposed architecture documented; provider facts and architecture review remain open.
+**Current phase:** Phase 1 — Project foundation  
+**Status:** Phase 0 documents are in place. Phase 1 foundation is implemented; provider research remains open and Phase 2 has not started.
 
 ## Repository assessment
 
-The initial branch contained a title-only `README.md`. After syncing the current `main`, the repository contains `README.md` and `COPILOT_MASTER_PROMPT.md` only. There is no application, framework, package manager, dependency manifest, scripts, test suite, environment configuration, CI, database, or provider credentials. No build, lint, typecheck, or test command exists or was run.
+The repository began with a title-only `README.md` and the master prompt. Phase 1 adds a pnpm TypeScript workspace containing a Next.js web application and Fastify API, MongoDB connectivity checks, environment validation, CI, and API tests. It still has no market-data provider credentials or trading behavior.
 
 The repository currently targets a personal research-first trading copilot for XAU/USD, EUR/USD, and GBP/USD. It explicitly requires real-data provenance, deterministic risk calculations, no silent mock fallback, and a separate approval/validation gate for live trading.
 
@@ -25,13 +25,25 @@ The repository currently targets a personal research-first trading copilot for X
 | 9 — Production hardening | Prepare research/paper features for controlled deployment. | Authz, secrets, rate limits, monitoring, backups/recovery, deployment, incident handling, and security checks are tested and documented. |
 | 10 — Optional broker integration | Consider a separate broker project/release only after explicit approval. | Broker/demo mode, mapping, reconciliation, idempotency, deterministic controls, kill switch, audit trail, and independent security review pass; live execution remains disabled absent explicit authorization. |
 
+## Phase 1 foundation delivered
+
+- `apps/web`: minimal Next.js App Router page and no-cache `/api/health` endpoint.
+- `apps/api`: Fastify `/health` liveness and `/ready` database-readiness endpoints. Readiness returns HTTP 503 if MongoDB is unconfigured or unavailable.
+- Runtime config is parsed with Zod; error messages identify invalid variable names without echoing values. Fastify redacts authorization and cookie headers.
+- pnpm workspace uses a checked-in lockfile and Node 22.9+; `docker-compose.yml` provides a loopback-only MongoDB service for local development.
+- CI runs lint, typecheck, tests, and production builds. The API tests exercise config validation, health, and missing-database behavior.
+
+This foundation does not persist application data, connect to any market-data provider, or provide authentication. The local MongoDB container has no authentication and must not be used as a production deployment.
+
 ## Smallest useful next milestones
 
 1. **Review Phase 0 decisions:** confirm or revise the proposed Next.js + TypeScript, Node.js API, MongoDB, and modular-monolith boundaries. Verify provider requirements and licensing before selecting a vendor.
-2. **Phase 1 foundation:** after review, add a minimal workspace containing one web app and one API, configuration validation, health endpoints, structured redacted logging, MongoDB connectivity, CI, and a small test suite. Avoid empty feature packages.
-3. **Phase 2 vertical slice:** implement one provider adapter only after terms/coverage are verified; demonstrate a real quote and candle with provenance for all three instruments before building AI or chart workflows.
+2. **Phase 2 provider gate:** verify provider coverage, history, quote semantics, costs, limits, and data-use terms. No provider is chosen yet.
+3. **Phase 2 vertical slice:** after the provider gate passes, implement one adapter and demonstrate real quotes/candles with provenance for all three instruments before building AI or chart workflows.
 
-No software dependencies, credentials, Docker setup, or app code are added in this Phase 0 documentation milestone.
+## Phase 1 verification
+
+Run the documented setup from a clean checkout, then verify both health endpoints, `/ready` with and without MongoDB, and CI. Record actual results here; never claim a provider integration or trading feature based on these foundation checks.
 
 ## Open questions and risks
 
@@ -47,4 +59,4 @@ No software dependencies, credentials, Docker setup, or app code are added in th
 - Inspected repository files and Git state after syncing `main`.
 - Read the master prompt and confirmed the requested Phase 0 outputs.
 - Attempted to retrieve vendor official docs; DNS lookup failed for each site. Provider coverage, prices, quotas, freshness, and licensing are explicitly unverified.
-- No application commands exist; no tests/build/lint were run.
+- Phase 1 tools and commands are now defined in the root package manifest and CI workflow.
