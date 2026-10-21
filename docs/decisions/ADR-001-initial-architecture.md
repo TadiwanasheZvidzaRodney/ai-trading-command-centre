@@ -23,6 +23,7 @@ This follows the stated stack preferences while keeping the first release small 
 - Provider, AI, news, calendar, charting, hosting, authentication, and job-scheduling choices remain open.
 - Phase 1 must prove a reproducible local setup, health checks, environment validation, logging, persistence connectivity, and CI before market-data integration.
 - No broker integration or live order route is authorized.
+- The Next.js ESLint plugins in this scaffold currently require ESLint 9; the selected version is deprecated upstream, so revisit the linter once those plugins support a newer ESLint major without weakening peer-dependency checks.
 
 ## Revisit when
 

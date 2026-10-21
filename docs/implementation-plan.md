@@ -1,6 +1,6 @@
 # Implementation plan
 
-**Current phase:** Phase 1 — Project foundation  
+**Current phase:** Phase 1 — Project foundation
 **Status:** Phase 0 documents are in place. Phase 1 foundation is implemented; provider research remains open and Phase 2 has not started.
 
 ## Repository assessment
@@ -30,7 +30,7 @@ The repository currently targets a personal research-first trading copilot for X
 - `apps/web`: minimal Next.js App Router page and no-cache `/api/health` endpoint.
 - `apps/api`: Fastify `/health` liveness and `/ready` database-readiness endpoints. Readiness returns HTTP 503 if MongoDB is unconfigured or unavailable.
 - Runtime config is parsed with Zod; error messages identify invalid variable names without echoing values. Fastify redacts authorization and cookie headers.
-- pnpm workspace uses a checked-in lockfile and Node 22.9+; `docker-compose.yml` provides a loopback-only MongoDB service for local development.
+- pnpm workspace uses a checked-in lockfile and Node 22.9+; `docker-compose.yml` provides a loopback-only, digest-pinned MongoDB service for local development.
 - CI runs lint, typecheck, tests, and production builds. The API tests exercise config validation, health, and missing-database behavior.
 
 This foundation does not persist application data, connect to any market-data provider, or provide authentication. The local MongoDB container has no authentication and must not be used as a production deployment.
@@ -43,7 +43,7 @@ This foundation does not persist application data, connect to any market-data pr
 
 ## Phase 1 verification
 
-Run the documented setup from a clean checkout, then verify both health endpoints, `/ready` with and without MongoDB, and CI. Record actual results here; never claim a provider integration or trading feature based on these foundation checks.
+Verified in this workspace: frozen pnpm install, lint, typecheck, all 6 API tests, and API/web production builds pass. The API `/health`, API `/ready` against the local MongoDB container, and web `/api/health` responded successfully in runtime smoke checks. The unit suite confirms `/ready` returns HTTP 503 when MongoDB is unconfigured or unreachable. CI is configured but has not yet run on GitHub.
 
 ## Open questions and risks
 
@@ -59,4 +59,5 @@ Run the documented setup from a clean checkout, then verify both health endpoint
 - Inspected repository files and Git state after syncing `main`.
 - Read the master prompt and confirmed the requested Phase 0 outputs.
 - Attempted to retrieve vendor official docs; DNS lookup failed for each site. Provider coverage, prices, quotas, freshness, and licensing are explicitly unverified.
-- Phase 1 tools and commands are now defined in the root package manifest and CI workflow.
+- Phase 1 local validation: `pnpm lint`, `pnpm typecheck`, `pnpm test` (6 passing), `pnpm build`, frozen install, Mongo-backed readiness, and web/API health smoke checks all passed.
+- CI workflow has been committed locally but has not yet been observed running remotely.

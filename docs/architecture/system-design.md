@@ -1,25 +1,25 @@
 # Proposed system design
 
-**Status:** Phase 0 proposal; architecture and provider choices require review.
+**Status:** Phase 1 foundation implemented; provider and production choices remain open.
 
 ## Repository assessment
 
-The inspected repository contains `README.md` and `COPILOT_MASTER_PROMPT.md` only. There is no application source, package manifest, framework, dependency lockfile, test suite, CI configuration, environment template, or database setup. No behavior has been implemented or tested.
+The repository now contains a pnpm TypeScript workspace, a Next.js web shell, a Fastify API, environment validation, health checks, MongoDB readiness, and CI. Market data, persistence of application records, authentication, and trading behavior are not implemented.
 
 The initial product is a personal research and decision-support tool for XAU/USD, EUR/USD, and GBP/USD. It should progress from research to paper trading; live order execution is explicitly out of scope for the initial design.
 
 ## Proposed architecture
 
-Start with a modular monolith in a pnpm-managed TypeScript workspace:
+Use a modular monolith in a pnpm-managed TypeScript workspace:
 
 - `apps/web`: Next.js user interface. It presents provider provenance and freshness and does not hold provider or AI credentials.
-- `apps/api`: Node.js API, provisionally Fastify. It validates requests and coordinates domain modules.
+- `apps/api`: Fastify Node.js API. It validates requests and will coordinate domain modules.
 - MongoDB: persistence for normalized market observations and future user-owned research records.
 - Provider adapters: isolated behind interfaces; vendor SDKs and API schemas stay outside domain logic.
 - Domain modules: instrument/watchlist, market data, analysis, planning/risk, paper trading, journal/tasks, and provider health. Add modules as needed rather than scaffolding empty packages.
 - Shared contracts: typed request/response schemas and domain types, introduced when there are concrete consumers.
 
-The workspace is a proposal, not an implemented stack. Keep deployment and ingestion simple until measured needs justify workers or additional services. Do not select charting, AI, news, or calendar vendors before checking capability, licensing, cost, and operational requirements.
+The web/API foundation and local MongoDB readiness check are implemented. Keep deployment and ingestion simple until measured needs justify workers or additional services. Do not select charting, AI, news, or calendar vendors before checking capability, licensing, cost, and operational requirements.
 
 ## Module boundaries and core records
 
@@ -32,7 +32,7 @@ Provider-specific ingestion should produce normalized records with source proven
 - `TradePlan`: user-authored proposed conditions and deterministic risk calculation; not an order.
 - `PaperOrder` (future): simulated lifecycle with explicit spread/slippage assumptions; never routes to a broker.
 
-These are design concepts only; no schemas or persistence have been implemented. Values must retain decimal precision suitable for the selected provider and instrument; do not assume all instruments share tick or contract conventions.
+These are design concepts only; no application records or schemas have been implemented or persisted. Values must retain decimal precision suitable for the selected provider and instrument; do not assume all instruments share tick or contract conventions.
 
 ## Financial and data-safety boundaries
 
@@ -44,4 +44,4 @@ These are design concepts only; no schemas or persistence have been implemented.
 
 ## Proposed validation strategy
 
-When implementation begins, add unit tests for schemas, timestamp normalization, stale-data rules, and financial calculations; provider contract/integration tests that do not require secrets by default; and later UI/API workflow tests. Clearly distinguish fixture-based tests from tests against a provider sandbox or production account. There are currently no test commands to run.
+Current API tests validate configuration, liveness, and fail-closed readiness without MongoDB. Add unit tests for timestamp normalization, stale-data rules, and financial calculations when those modules are implemented; provider contract/integration tests that do not require secrets by default; and later UI/API workflow tests. Clearly distinguish fixture-based tests from tests against a provider sandbox or production account.

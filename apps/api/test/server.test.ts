@@ -25,3 +25,22 @@ test("readiness fails closed when MongoDB is not configured", async (t) => {
     checks: { database: "not_configured" },
   });
 });
+
+test("readiness hides details when configured MongoDB is unavailable", async (t) => {
+  const server = buildServer(
+    loadConfig({
+      NODE_ENV: "test",
+      MONGODB_URI: "mongodb://127.0.0.1:1/ai_trading_command_centre",
+    }),
+  );
+  t.after(() => server.close());
+
+  const response = await server.inject({ method: "GET", url: "/ready" });
+
+  assert.equal(response.statusCode, 503);
+  assert.deepEqual(response.json(), {
+    status: "not_ready",
+    checks: { database: "unavailable" },
+  });
+  assert.doesNotMatch(response.body, /127\.0\.0\.1/);
+});
