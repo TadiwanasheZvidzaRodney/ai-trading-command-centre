@@ -1,0 +1,37 @@
+# dependencies
+node_modules/
+
+# builds
+dist/
+.next/
+out/
+*.tsbuildinfo
+
+# tests
+coverage/
+playwright-report/
+test-results/
+
+# environment and secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# logs
+logs/
+*.log
+npm-debug.log*
+
+# local data
+data/
+.cache/
+
+# editors / OS
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json

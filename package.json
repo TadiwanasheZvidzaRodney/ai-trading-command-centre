@@ -1,0 +1,55 @@
+{
+  "name": "ai-trading-command-centre",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Personal AI trading research, planning, risk and paper-trading workspace.",
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n api,web -c cyan,magenta \"npm run dev -w @atc/api\" \"npm run dev -w @atc/web\"",
+    "dev:api": "npm run dev -w @atc/api",
+    "dev:web": "npm run dev -w @atc/web",
+    "build": "npm run build -w @atc/api && npm run build -w @atc/web",
+    "start:api": "npm run start -w @atc/api",
+    "start:web": "npm run start -w @atc/web",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "db:up": "docker compose up -d mongo",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f mongo",
+    "auth:hash": "tsx scripts/hash-password.ts",
+    "seed": "tsx scripts/seed.ts",
+    "check": "npm run lint && npm run typecheck && npm run test && npm run build"
+  },
+  "devDependencies": {
+    "@atc/config": "*",
+    "@atc/shared": "*",
+    "@eslint/js": "^9.39.5",
+    "@types/node": "^24.19.2",
+    "@vitest/coverage-v8": "^5.0.5",
+    "bcryptjs": "^3.0.3",
+    "concurrently": "^10.0.6",
+    "eslint": "^9.39.5",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-react-hooks": "^7.1.1",
+    "globals": "^17.13.0",
+    "mongodb": "^7.7.0",
+    "prettier": "^3.9.10",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.72.1",
+    "vitest": "^5.0.5"
+  }
+}
