@@ -7,6 +7,7 @@ import type {
   ProviderHealth,
   ProviderInfo,
   Quote,
+  Task,
   Timeframe,
 } from '@atc/shared';
 import useSWR, { type SWRConfiguration } from 'swr';
@@ -124,8 +125,17 @@ export function useMarketQuotes() {
 export function useCandles(instrument: InstrumentSymbol | null, timeframe: Timeframe) {
   return useApi<CandlesResponse>(
     instrument
-      ? `/api/v1/market/candles/${instrument}?timeframe=${timeframe}&limit=60`
+      ? `/api/v1/market/candles/${instrument}?timeframe=${timeframe}&limit=200`
       : null,
     { refreshInterval: 60_000 },
   );
+}
+
+export interface TasksResponse {
+  tasks: Task[];
+  timestamp: string;
+}
+
+export function useTasks() {
+  return useApi<TasksResponse>('/api/v1/tasks', { refreshInterval: 60_000 });
 }

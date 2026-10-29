@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { INSTRUMENT_VALUES, TIMEFRAME_VALUES } from './constants.js';
+import { INSTRUMENT_VALUES, TIMEFRAME_VALUES } from './constants';
 
 export const instrumentSymbolSchema = z.enum(INSTRUMENT_VALUES);
 export const timeframeSchema = z.enum(TIMEFRAME_VALUES);
@@ -210,7 +210,7 @@ export const paperOrderRequestSchema = z
   });
 
 export const taskCreateSchema = z.object({
-  title: z.string().min(1).max(300),
+  title: z.string().trim().min(1).max(300),
   notes: z.string().max(4000).default(''),
   status: z.enum(['todo', 'in_progress', 'done']).default('todo'),
   priority: z.enum(['low', 'medium', 'high']).default('medium'),
@@ -218,7 +218,14 @@ export const taskCreateSchema = z.object({
   instrument: instrumentSymbolSchema.nullable().optional(),
 });
 
-export const taskUpdateSchema = taskCreateSchema.partial();
+export const taskUpdateSchema = z.object({
+  title: z.string().trim().min(1).max(300).optional(),
+  notes: z.string().max(4000).optional(),
+  status: z.enum(['todo', 'in_progress', 'done']).optional(),
+  priority: z.enum(['low', 'medium', 'high']).optional(),
+  dueAt: isoDateSchema.nullable().optional(),
+  instrument: instrumentSymbolSchema.nullable().optional(),
+});
 
 export const setupCreateSchema = z.object({
   instrument: instrumentSymbolSchema,

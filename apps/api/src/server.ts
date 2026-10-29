@@ -21,6 +21,8 @@ import { loggerOptions } from './logger.js';
 import { MongoMarketDataStore } from './market/repository.js';
 import { registerMarketRoutes } from './market/routes.js';
 import { registerSystemRoutes } from './system/routes.js';
+import { MongoTaskStore, type TaskStore } from './tasks/repository.js';
+import { registerTaskRoutes } from './tasks/routes.js';
 
 const VERSION = '0.1.0';
 
@@ -102,6 +104,7 @@ export interface BuildServerOptions {
   db: DatabaseLike;
   logger?: FastifyServerOptions['logger'];
   marketData?: MarketDataService;
+  taskStore?: TaskStore;
 }
 
 export async function buildServer(options: BuildServerOptions): Promise<FastifyInstance> {
@@ -130,6 +133,7 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
         error: (context, message) => app.log.error(context, message),
       },
     });
+  const taskStore = options.taskStore ?? new MongoTaskStore(db.db);
 
   await app.register(cookie, { secret: env.SESSION_SECRET });
 
@@ -174,6 +178,7 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   await registerHealthRoutes(app, { env, db, marketData });
   await registerAuthRoutes(app, { env, db });
   await registerMarketRoutes(app, { marketData });
+  await registerTaskRoutes(app, { store: taskStore });
   await registerSystemRoutes(app, { env });
 
   app.get('/', async () => ({

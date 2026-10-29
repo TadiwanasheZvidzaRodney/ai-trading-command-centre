@@ -1,9 +1,30 @@
 'use client';
 
-import { AlertTriangle, CheckCircle2, Circle, Database, Gauge, LineChart, Server, ShieldCheck } from 'lucide-react';
+import {
+  AlertTriangle,
+  CheckCircle2,
+  Circle,
+  Clock,
+  Database,
+  Gauge,
+  LineChart,
+  Server,
+  ShieldCheck,
+} from 'lucide-react';
 import Link from 'next/link';
 import { ProviderTable } from '@/components/ProviderTable';
-import { useAuthStatus, useHealth, useProviders, useSystemInfo } from '@/lib/hooks';
+import {
+  useAuthStatus,
+  useHealth,
+  useInstruments,
+  useMarketQuotes,
+  useProviders,
+  useSystemInfo,
+} from '@/lib/hooks';
+
+function formatPrice(value: number | null | undefined, precision: number): string {
+  return value === null || value === undefined ? '—' : value.toFixed(precision);
+}
 
 function Stat({
   label,
@@ -32,16 +53,22 @@ export default function OverviewPage() {
   const providers = useProviders();
   const auth = useAuthStatus();
   const info = useSystemInfo();
+  const instruments = useInstruments();
+  const marketQuotes = useMarketQuotes();
 
   const databaseOk = health.data?.checks.database.status === 'ok';
   const apiOnline = health.data?.status === 'ok';
   const providerCount = providers.data?.providers.length ?? 0;
+  const instrumentList = instruments.data?.instruments ?? [];
+  const quoteMap = new Map(
+    marketQuotes.data?.quotes.map((quote) => [quote.instrument, quote]) ?? [],
+  );
 
   return (
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 2 · Market data</span>
+          <span className="pill accent">Phase 3 · Trading workspace</span>
           <h2>Research first. Risk before reward.</h2>
           <p>
             A personal workspace for XAU/USD, EUR/USD and GBP/USD. Real data, deterministic
@@ -104,6 +131,78 @@ export default function OverviewPage() {
         </div>
       )}
 
+      <section className="card">
+        <div className="card-header">
+          <div>
+            <h3 className="card-title">Market watch</h3>
+            <span className="hint">Live quotes, age and quality</span>
+          </div>
+          <Link href="/markets" className="btn btn-sm">
+            <LineChart size={13} /> Open workspace
+          </Link>
+        </div>
+        <div className="card-body">
+          {marketQuotes.isLoading && instrumentList.length === 0 ? (
+            <div className="loading">
+              <span className="spinner" /> Loading quotes…
+            </div>
+          ) : marketQuotes.error ? (
+            <div className="banner error">
+              <AlertTriangle size={16} />
+              <span>
+                Quotes unavailable: {marketQuotes.error.message}. No fallback price was used.
+              </span>
+            </div>
+          ) : (
+            <div className="watchlist overview-watchlist">
+              {instrumentList.map((instrument) => {
+                const quote = quoteMap.get(instrument.symbol);
+                return (
+                  <Link
+                    key={instrument.symbol}
+                    href="/markets"
+                    className="watch-row"
+                  >
+                    <div className="watch-head">
+                      <span className="watch-symbol mono">{instrument.symbol}</span>
+                      <span className="watch-name">{instrument.displayName}</span>
+                    </div>
+                    <div className="watch-price mono">
+                      {quote ? formatPrice(quote.mid, instrument.pricePrecision) : '—'}
+                    </div>
+                    <div className="watch-meta">
+                      {quote ? (
+                        <>
+                          <span
+                            className={`badge ${
+                              quote.quality === 'proxy'
+                                ? 'proxy'
+                                : quote.quality === 'reference'
+                                  ? 'warn'
+                                  : quote.quality === 'delayed'
+                                    ? 'info'
+                                    : 'ok'
+                            }`}
+                          >
+                            {quote.quality}
+                          </span>
+                          {quote.stale && <span className="badge warn">Stale</span>}
+                          <span className="muted">
+                            <Clock size={10} /> {quote.ageSeconds}s
+                          </span>
+                        </>
+                      ) : (
+                        <span className="muted">No quote yet</span>
+                      )}
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      </section>
+
       <div className="grid grid-2">
         <section className="card">
           <div className="card-header">
@@ -131,7 +230,7 @@ export default function OverviewPage() {
         <section className="card">
           <div className="card-header">
             <h3 className="card-title">Foundation checklist</h3>
-            <span className="badge ok">Phase 2</span>
+            <span className="badge ok">Phase 3</span>
           </div>
           <div className="card-body">
             <ul className="checklist">
@@ -155,15 +254,22 @@ export default function OverviewPage() {
                 <CheckCircle2 size={15} />
                 <span>Real quote and candle adapters with provenance, freshness and proxy labels (Phase 2).</span>
               </li>
+              <li className="done">
+                <CheckCircle2 size={15} />
+                <span>Trading workspace with watchlist, candlestick charts, snapshot, tasks and calendar (Phase 3).</span>
+              </li>
               <li className="pending">
                 <Circle size={15} />
-                <span>News, calendar, analysis, risk, paper trading and backtesting.</span>
+                <span>News, calendar ingestion, analysis, risk, paper trading and backtesting.</span>
               </li>
             </ul>
           </div>
           <div className="card-footer">
             <Link href="/markets" className="btn btn-sm">
               <LineChart size={13} /> Open Markets
+            </Link>
+            <Link href="/tasks" className="btn btn-sm">
+              <CheckCircle2 size={13} /> Tasks
             </Link>
             <Link href="/settings" className="btn btn-sm">
               <Server size={13} /> View system configuration
@@ -219,16 +325,16 @@ export default function OverviewPage() {
         <section className="card">
           <div className="card-header">
             <h3 className="card-title">Next milestone</h3>
-            <span className="badge accent">Phase 3</span>
+            <span className="badge accent">Phase 4</span>
           </div>
           <div className="card-body stack small muted">
             <p>
-              Turn the Markets page into a full research workspace: richer charting,
-              watchlists, instrument detail and task reminders.
+              Ingest public RSS news and the economic calendar with source attribution,
+              relevance tagging and UTC-normalised event times.
             </p>
             <p className="hint">
-              Gold history stays labelled as a COMEX futures proxy until a direct XAU/USD
-              provider is configured.
+              Until ingestion is live, the News and Calendar pages show no events rather
+              than placeholder data.
             </p>
           </div>
         </section>

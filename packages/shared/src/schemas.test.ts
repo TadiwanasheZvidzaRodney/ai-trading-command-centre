@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { paperOrderRequestSchema, tradePlanRequestSchema } from './schemas.js';
+import { paperOrderRequestSchema, tradePlanRequestSchema } from './schemas';
 
 describe('request schemas', () => {
   it('accepts a valid trade plan', () => {

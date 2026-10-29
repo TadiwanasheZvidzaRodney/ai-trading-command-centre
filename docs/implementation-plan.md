@@ -1,7 +1,7 @@
 # Implementation Plan
 
 **Last updated:** 2026-10-29
-**Current phase:** Phase 2 complete. Phase 3 is next.
+**Current phase:** Phase 3 complete. Phase 4 is next.
 
 Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete with evidence.
 
@@ -106,17 +106,42 @@ quote; gold proxy data is unmistakably labelled.
 
 Goal: a usable research workspace.
 
-- [ ] Responsive app shell, navigation and design system.
-- [ ] Overview dashboard.
-- [ ] Watchlist with live quotes and freshness.
-- [ ] Candlestick chart with timeframes and volume where available.
-- [ ] Instrument detail with technical snapshot.
-- [ ] Tasks and reminders UI.
-- [ ] Calendar UI.
-- [ ] Loading, empty and error states.
+- [x] Responsive app shell, navigation and design system.
+- [x] Overview dashboard.
+- [x] Watchlist with live quotes and freshness.
+- [x] Candlestick chart with timeframes and volume where available.
+- [x] Instrument detail with technical snapshot.
+- [x] Tasks and reminders UI.
+- [x] Calendar UI.
+- [x] Loading, empty and error states.
 
 **Acceptance criteria:** a user can open the app, see real quotes/candles, switch
 timeframes, read provenance warnings, and manage tasks without console errors.
+
+**Verified 2026-10-29:**
+- `npm run lint` — clean, 0 errors and 0 warnings.
+- `npm run typecheck` — API, web, config, market-data and shared workspaces pass.
+- `npm test` — 17 files, 96 tests passed, including 7 task-route tests and 6
+  deterministic candle-summary tests.
+- `npm run build` — API ESM bundle 172.99 KB; Next.js production build completed with
+  14 static routes including `/markets`, `/tasks` and `/calendar`.
+- Live task API smoke against `http://127.0.0.1:4000`: create, list, PATCH and DELETE
+  work. PATCH `{ status: "done" }` preserves notes, priority and instrument and sets
+  `completedAt`; the empty-update guard returns `400 VALIDATION_ERROR`.
+- Browser at `http://localhost:3000/markets`: three live Swissquote quotes in the
+  watchlist, 200-candle Lightweight Charts candlestick series with volume where the
+  provider reports it, XAU/USD 1h proxy and EUR/USD 4h switching, deterministic
+  snapshot, provenance panel, recent-candle table and provider health; no console errors.
+- Browser at `http://localhost:3000/tasks`: created a task with notes, high priority and
+  XAU/USD, started it, completed it and deleted it through the UI; no console errors.
+- Browser at `http://localhost:3000/calendar`: UTC week view for 26 Oct - 01 Nov 2026
+  with seven day cells, explicit no-events state and calendar provider health; no
+  console errors.
+- The calendar page is a UI shell only. Event ingestion is intentionally deferred to
+  Phase 4, so it shows no placeholder events.
+- The instrument snapshot is a deterministic summary of the visible candle window
+  (change, range, SMA 20/50, trend, gaps). It is not a recommendation; full indicators
+  and strategies remain Phase 5.
 
 ## Phase 4 - News and macro intelligence
 

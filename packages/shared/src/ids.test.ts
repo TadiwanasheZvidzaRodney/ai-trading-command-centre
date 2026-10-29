@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { canonicalJson, canonicalUrl, normaliseTitle, stableHash } from './ids.js';
+import { canonicalJson, canonicalUrl, normaliseTitle, stableHash } from './ids';
 
 describe('id helpers', () => {
   it('canonicalises URLs by removing tracking parameters and fragments', () => {

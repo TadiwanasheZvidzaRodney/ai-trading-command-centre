@@ -1,6 +1,6 @@
 import { formatInTimeZone } from 'date-fns-tz';
-import type { Instrument, InstrumentSymbol, Timeframe } from './types.js';
-import { TIMEFRAME_MS } from './constants.js';
+import type { Instrument, InstrumentSymbol, Timeframe } from './types';
+import { TIMEFRAME_MS } from './constants';
 
 export function nowIso(): string {
   return new Date().toISOString();

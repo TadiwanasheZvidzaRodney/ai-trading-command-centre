@@ -99,6 +99,26 @@ export interface CandleSeries {
   notes: string[];
 }
 
+/** Deterministic summary derived only from the supplied candle series. */
+export interface MarketSummary {
+  candleCount: number;
+  lastClose: number;
+  firstClose: number;
+  change: number;
+  changePct: number;
+  periodHigh: number;
+  periodLow: number;
+  averageRange: number;
+  averageVolume: number | null;
+  volumeAvailable: boolean;
+  sma20: number | null;
+  sma50: number | null;
+  trend: Trend;
+  gapCount: number;
+  expectedGapCount: number;
+  asOf: string;
+}
+
 export interface ProviderHealth {
   providerId: string;
   displayName: string;

@@ -6,7 +6,7 @@ import {
   isExpectedMarketGap,
   isStale,
   marketSessionState,
-} from './time.js';
+} from './time';
 
 describe('time helpers', () => {
   it('calculates age and staleness from provider timestamps', () => {

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { formatPct, formatUsd, pipsBetween, roundDownToStep, roundTo, safeDivide } from './money.js';
+import { formatPct, formatUsd, pipsBetween, roundDownToStep, roundTo, safeDivide } from './money';
 
 describe('money helpers', () => {
   it('rounds down to the lot step without increasing risk', () => {

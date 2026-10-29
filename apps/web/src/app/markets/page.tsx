@@ -1,15 +1,26 @@
 'use client';
 
-import type {
-  CandleSeries,
-  DataQuality,
-  Instrument,
-  InstrumentSymbol,
-  Timeframe,
+import {
+  summarizeCandles,
+  type CandleSeries,
+  type DataQuality,
+  type Instrument,
+  type InstrumentSymbol,
+  type MarketSummary,
+  type Timeframe,
 } from '@atc/shared';
-import { AlertTriangle, Clock, Database, LineChart, ShieldCheck } from 'lucide-react';
+import {
+  AlertTriangle,
+  Clock,
+  Database,
+  Gauge,
+  LineChart,
+  ShieldCheck,
+  TrendingDown,
+  TrendingUp,
+} from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { CandlePreview } from '@/components/CandlePreview';
+import { PriceChart } from '@/components/PriceChart';
 import { ProviderTable } from '@/components/ProviderTable';
 import {
   useCandles,
@@ -34,6 +45,13 @@ const QUALITY_LABEL: Record<DataQuality, string> = {
   delayed: 'Delayed',
   reference: 'Reference',
   proxy: 'Proxy',
+};
+
+const TREND_LABEL: Record<MarketSummary['trend'], string> = {
+  uptrend: 'Uptrend',
+  downtrend: 'Downtrend',
+  range: 'Range',
+  unknown: 'Insufficient data',
 };
 
 function formatPrice(value: number | null | undefined, precision: number): string {
@@ -70,113 +88,142 @@ function formatCandleTime(time: number): string {
   }).format(new Date(time));
 }
 
-function QuoteCard({
-  instrument,
-  quote,
-  error,
+function Watchlist({
+  instruments,
+  quotes,
+  errors,
+  selected,
+  onSelect,
   loading,
 }: {
-  instrument: Instrument;
-  quote?: MarketQuote;
-  error?: MarketQuoteError;
+  instruments: Instrument[];
+  quotes: Map<InstrumentSymbol, MarketQuote>;
+  errors: Map<InstrumentSymbol, MarketQuoteError>;
+  selected: InstrumentSymbol;
+  onSelect: (instrument: InstrumentSymbol) => void;
   loading: boolean;
 }) {
-  if (loading && !quote) {
-    return (
-      <section className="card quote-card">
-        <div className="card-header">
-          <div>
-            <h3 className="card-title">{instrument.displayName}</h3>
-            <span className="hint mono">{instrument.symbol}</span>
-          </div>
-          <span className="badge">Loading</span>
-        </div>
-        <div className="card-body">
-          <div className="loading">
-            <span className="spinner" /> Fetching quote…
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  if (error) {
-    return (
-      <section className="card quote-card">
-        <div className="card-header">
-          <div>
-            <h3 className="card-title">{instrument.displayName}</h3>
-            <span className="hint mono">{instrument.symbol}</span>
-          </div>
-          <span className="badge error">Unavailable</span>
-        </div>
-        <div className="card-body">
-          <p className="error-text">{error.message}</p>
-          <p className="hint">No fallback or fabricated price was used.</p>
-        </div>
-      </section>
-    );
-  }
-
-  if (!quote) {
-    return (
-      <section className="card quote-card">
-        <div className="card-header">
-          <div>
-            <h3 className="card-title">{instrument.displayName}</h3>
-            <span className="hint mono">{instrument.symbol}</span>
-          </div>
-          <span className="badge">Waiting</span>
-        </div>
-        <div className="card-body">
-          <p className="hint">No quote has been returned yet.</p>
-        </div>
-      </section>
-    );
-  }
-
   return (
-    <section className="card quote-card">
-      <div className="card-header">
-        <div>
-          <h3 className="card-title">{instrument.displayName}</h3>
-          <span className="hint mono">{instrument.symbol}</span>
-        </div>
-        <div className="quote-badges">
-          <span className={`badge ${QUALITY_CLASS[quote.quality]}`}>
-            {QUALITY_LABEL[quote.quality]}
-          </span>
-          {quote.proxy && <span className="badge proxy">Proxy</span>}
-          {quote.stale && <span className="badge warn">Stale</span>}
-          {quote.cached && <span className="badge info">Cached</span>}
-        </div>
+    <div className="watchlist">
+      {instruments.map((instrument) => {
+        const quote = quotes.get(instrument.symbol);
+        const error = errors.get(instrument.symbol);
+        return (
+          <button
+            key={instrument.symbol}
+            type="button"
+            className={`watch-row ${instrument.symbol === selected ? 'active' : ''}`}
+            onClick={() => onSelect(instrument.symbol)}
+          >
+            <div className="watch-head">
+              <span className="watch-symbol mono">{instrument.symbol}</span>
+              <span className="watch-name">{instrument.displayName}</span>
+            </div>
+            {error ? (
+              <div className="watch-error">Unavailable · no fallback used</div>
+            ) : quote ? (
+              <>
+                <div className="watch-price mono">
+                  {formatPrice(quote.mid, instrument.pricePrecision)}
+                </div>
+                <div className="watch-meta">
+                  <span className={`badge ${QUALITY_CLASS[quote.quality]}`}>
+                    {QUALITY_LABEL[quote.quality]}
+                  </span>
+                  {quote.stale && <span className="badge warn">Stale</span>}
+                  <span className="muted">
+                    <Clock size={10} /> {quote.ageSeconds}s
+                  </span>
+                </div>
+                <div className="watch-pairs mono">
+                  <span>B {formatPrice(quote.bid, instrument.pricePrecision)}</span>
+                  <span>A {formatPrice(quote.ask, instrument.pricePrecision)}</span>
+                  <span>S {formatCompact(quote.spread)}</span>
+                </div>
+              </>
+            ) : (
+              <div className="watch-loading">
+                {loading ? (
+                  <>
+                    <span className="spinner" /> Loading quote…
+                  </>
+                ) : (
+                  'No quote yet'
+                )}
+              </div>
+            )}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
+function Snapshot({ summary, precision }: { summary: MarketSummary; precision: number }) {
+  const trendIcon =
+    summary.trend === 'uptrend' ? (
+      <TrendingUp size={13} />
+    ) : summary.trend === 'downtrend' ? (
+      <TrendingDown size={13} />
+    ) : (
+      <Gauge size={13} />
+    );
+  const positive = summary.change >= 0;
+  return (
+    <div className="stack">
+      <div className="row-between">
+        <span className="muted">Trend (SMA 20/50)</span>
+        <span className={`badge ${summary.trend === 'uptrend' ? 'ok' : summary.trend === 'downtrend' ? 'error' : 'info'}`}>
+          {trendIcon} {TREND_LABEL[summary.trend]}
+        </span>
       </div>
-      <div className="card-body">
-        <div className="quote-mid mono">{formatPrice(quote.mid, instrument.pricePrecision)}</div>
-        <div className="quote-pairs">
-          <div>
-            <span className="muted">Bid</span>
-            <span className="mono">{formatPrice(quote.bid, instrument.pricePrecision)}</span>
-          </div>
-          <div>
-            <span className="muted">Ask</span>
-            <span className="mono">{formatPrice(quote.ask, instrument.pricePrecision)}</span>
-          </div>
-          <div>
-            <span className="muted">Spread</span>
-            <span className="mono">{formatCompact(quote.spread)}</span>
-          </div>
-        </div>
-        <div className="quote-meta">
-          <span>{quote.provider.displayName}</span>
-          <span className="mono">
-            <Clock size={11} /> {formatUtc(quote.observedAt)}
-          </span>
-          <span>{quote.ageSeconds}s ago</span>
-        </div>
-        {quote.note && <p className="hint quote-note">{quote.note}</p>}
+      <div className="row-between">
+        <span className="muted">Change over window</span>
+        <span className={`mono ${positive ? 'positive' : 'negative'}`}>
+          {positive ? '+' : ''}
+          {formatPrice(summary.change, precision)} ({positive ? '+' : ''}
+          {summary.changePct.toFixed(2)}%)
+        </span>
       </div>
-    </section>
+      <div className="row-between">
+        <span className="muted">Period high</span>
+        <span className="mono">{formatPrice(summary.periodHigh, precision)}</span>
+      </div>
+      <div className="row-between">
+        <span className="muted">Period low</span>
+        <span className="mono">{formatPrice(summary.periodLow, precision)}</span>
+      </div>
+      <div className="row-between">
+        <span className="muted">Average candle range</span>
+        <span className="mono">{formatPrice(summary.averageRange, precision)}</span>
+      </div>
+      <div className="row-between">
+        <span className="muted">SMA 20</span>
+        <span className="mono">{formatPrice(summary.sma20, precision)}</span>
+      </div>
+      <div className="row-between">
+        <span className="muted">SMA 50</span>
+        <span className="mono">{formatPrice(summary.sma50, precision)}</span>
+      </div>
+      <div className="row-between">
+        <span className="muted">Average volume</span>
+        <span className="mono">
+          {summary.averageVolume === null
+            ? 'Not reported'
+            : Math.round(summary.averageVolume).toLocaleString('en-US')}
+        </span>
+      </div>
+      <div className="row-between">
+        <span className="muted">Candles / gaps</span>
+        <span className="mono">
+          {summary.candleCount} / {summary.gapCount} ({summary.expectedGapCount} expected)
+        </span>
+      </div>
+      <p className="hint snapshot-note">
+        Derived deterministically from the provider candles shown. This is a factual
+        snapshot, not a recommendation. Full indicator and strategy work arrives in Phase 5.
+      </p>
+    </div>
   );
 }
 
@@ -189,7 +236,6 @@ function Provenance({
   cached: boolean;
   precision: number;
 }) {
-  const expectedGaps = series.gaps.filter((gap) => gap.expected).length;
   const last = series.candles.at(-1);
   return (
     <div className="stack">
@@ -228,7 +274,7 @@ function Provenance({
       <div className="row-between">
         <span className="muted">Gaps</span>
         <span>
-          {series.gaps.length} ({expectedGaps} expected)
+          {series.gaps.length} ({series.gaps.filter((gap) => gap.expected).length} expected)
         </span>
       </div>
       <div className="row-between">
@@ -294,7 +340,7 @@ export default function MarketsPage() {
   const quotes = useMarketQuotes();
   const providers = useProviders();
   const [selected, setSelected] = useState<InstrumentSymbol>('XAU/USD');
-  const [timeframe, setTimeframe] = useState<Timeframe>('1d');
+  const [timeframe, setTimeframe] = useState<Timeframe>('1h');
   const candles = useCandles(selected, timeframe);
 
   const instrumentList = instruments.data?.instruments ?? [];
@@ -310,22 +356,27 @@ export default function MarketsPage() {
     (instrument) => instrument.symbol === selected,
   );
   const precision = selectedInstrument?.pricePrecision ?? 2;
+  const tickSize = selectedInstrument?.tickSize ?? 0.01;
   const series = candles.data?.series;
+  const summary = useMemo(
+    () => (series ? summarizeCandles(series.candles, series.gaps) : null),
+    [series],
+  );
+  const selectedQuote = quoteMap.get(selected);
   const marketProviders =
-    providers.data?.providers.filter((provider) => provider.category === 'market-data') ??
-    [];
+    providers.data?.providers.filter((provider) => provider.category === 'market-data') ?? [];
   const error = quotes.error ?? instruments.error;
 
   return (
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 2 · Real market data</span>
-          <h2>Quotes and candles with visible provenance.</h2>
+          <span className="pill accent">Phase 3 · Trading workspace</span>
+          <h2>Watchlist, chart and provenance in one view.</h2>
           <p>
-            Free-tier reference data for XAU/USD, EUR/USD and GBP/USD. Every price shows its
-            provider, observation time, freshness and quality. Gold history uses COMEX gold
-            futures (GC=F) as a clearly labelled proxy.
+            Free-tier reference data for XAU/USD, EUR/USD and GBP/USD. Every price and candle
+            shows its provider, observation time, freshness and quality. Gold history uses
+            COMEX gold futures (GC=F) as a clearly labelled proxy.
           </p>
         </div>
         <div className="hero-badges">
@@ -341,8 +392,8 @@ export default function MarketsPage() {
         <Database size={16} />
         <span>
           Quotes come from the public Swissquote website feed; candles come from the public
-          Yahoo Finance chart endpoint. Neither is trading-grade. Treat stale or missing values
-          as a reason to stand aside.
+          Yahoo Finance chart endpoint. Neither is trading-grade. Treat stale or missing
+          values as a reason to stand aside.
         </span>
       </div>
 
@@ -356,155 +407,187 @@ export default function MarketsPage() {
         </div>
       )}
 
-      <div className="grid grid-3">
-        {instruments.isLoading && (
-          <section className="card quote-card">
-            <div className="card-body">
+      <div className="workspace">
+        <aside className="card watchlist-card">
+          <div className="card-header">
+            <div>
+              <h3 className="card-title">Watchlist</h3>
+              <span className="hint">Live quotes · freshness</span>
+            </div>
+            <span className="badge">{instrumentList.length || '—'}</span>
+          </div>
+          <div className="card-body">
+            {instruments.isLoading && instrumentList.length === 0 ? (
               <div className="loading">
                 <span className="spinner" /> Loading instruments…
               </div>
-            </div>
-          </section>
-        )}
-        {instrumentList.map((instrument) => (
-          <QuoteCard
-            key={instrument.symbol}
-            instrument={instrument}
-            quote={quoteMap.get(instrument.symbol)}
-            error={errorMap.get(instrument.symbol)}
-            loading={quotes.isLoading}
-          />
-        ))}
-        {!instruments.isLoading && instrumentList.length === 0 && (
-          <section className="card quote-card">
-            <div className="card-body">
-              <div className="empty-state">
-                <LineChart size={24} />
-                <h3>No instruments reported</h3>
-                <p>The API did not return an instrument list. Check the API logs.</p>
-              </div>
-            </div>
-          </section>
-        )}
-      </div>
-
-      <div className="grid grid-2 markets-main">
-        <section className="card">
-          <div className="card-header">
-            <div>
-              <h3 className="card-title">Candles</h3>
-              <span className="hint">
-                {selected} · {timeframe} ·{' '}
-                {series?.provider.displayName ?? 'waiting for provider'}
-              </span>
-            </div>
-            <div className="segmented" role="group" aria-label="Timeframe">
-              {TIMEFRAMES.map((item) => (
-                <button
-                  key={item}
-                  type="button"
-                  className={`segmented-item ${item === timeframe ? 'active' : ''}`}
-                  onClick={() => setTimeframe(item)}
-                >
-                  {item}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className="card-body">
-            <div className="instrument-tabs" role="group" aria-label="Instrument">
-              {instrumentList.map((instrument) => (
-                <button
-                  key={instrument.symbol}
-                  type="button"
-                  className={`instrument-tab ${
-                    instrument.symbol === selected ? 'active' : ''
-                  }`}
-                  onClick={() => setSelected(instrument.symbol)}
-                >
-                  {instrument.symbol}
-                </button>
-              ))}
-            </div>
-            {candles.isLoading && (
-              <div className="loading">
-                <span className="spinner" /> Loading candles…
-              </div>
+            ) : (
+              <Watchlist
+                instruments={instrumentList}
+                quotes={quoteMap}
+                errors={errorMap}
+                selected={selected}
+                onSelect={setSelected}
+                loading={quotes.isLoading}
+              />
             )}
-            {candles.error && (
-              <div className="banner error">
-                <AlertTriangle size={16} />
-                <span>
-                  {candles.error.message}. No synthetic candles were generated.
+          </div>
+        </aside>
+
+        <div className="workspace-main">
+          <section className="card chart-card">
+            <div className="card-header">
+              <div>
+                <h3 className="card-title">
+                  {selectedInstrument?.displayName ?? selected}
+                  {selectedQuote && (
+                    <span className="mono chart-mid">
+                      {formatPrice(selectedQuote.mid, precision)}
+                    </span>
+                  )}
+                </h3>
+                <span className="hint">
+                  {selected} · {timeframe} ·{' '}
+                  {series?.provider.displayName ?? 'waiting for provider'}
                 </span>
               </div>
-            )}
-            {series && <CandlePreview series={series} pricePrecision={precision} />}
-          </div>
-        </section>
+              <div className="segmented" role="group" aria-label="Timeframe">
+                {TIMEFRAMES.map((item) => (
+                  <button
+                    key={item}
+                    type="button"
+                    className={`segmented-item ${item === timeframe ? 'active' : ''}`}
+                    onClick={() => setTimeframe(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="card-body">
+              {candles.isLoading && !series && (
+                <div className="loading chart-loading">
+                  <span className="spinner" /> Loading candles…
+                </div>
+              )}
+              {candles.error && (
+                <div className="banner error">
+                  <AlertTriangle size={16} />
+                  <span>{candles.error.message}. No synthetic candles were generated.</span>
+                </div>
+              )}
+              {series && (
+                <>
+                  <PriceChart
+                    series={series}
+                    pricePrecision={precision}
+                    tickSize={tickSize}
+                  />
+                  <div className="chart-footer">
+                    <span className={`badge ${QUALITY_CLASS[series.quality]}`}>
+                      {QUALITY_LABEL[series.quality]}
+                    </span>
+                    {series.proxy && <span className="badge proxy">Proxy</span>}
+                    <span className="muted">
+                      Fetched {formatUtc(series.fetchedAt, true)} · {series.candles.length}{' '}
+                      candles · {series.gaps.length} gaps
+                    </span>
+                    {candles.data?.cached && <span className="badge info">Cached</span>}
+                  </div>
+                </>
+              )}
+            </div>
+          </section>
 
-        <section className="card">
-          <div className="card-header">
-            <h3 className="card-title">Candle provenance</h3>
-            {series?.proxy && <span className="badge proxy">Proxy series</span>}
+          <div className="grid grid-2">
+            <section className="card">
+              <div className="card-header">
+                <div>
+                  <h3 className="card-title">Instrument snapshot</h3>
+                  <span className="hint">Derived from the chart window</span>
+                </div>
+                <span className="badge">Deterministic</span>
+              </div>
+              <div className="card-body">
+                {summary ? (
+                  <Snapshot summary={summary} precision={precision} />
+                ) : (
+                  <div className="empty-state">
+                    <LineChart size={24} />
+                    <h3>No snapshot yet</h3>
+                    <p>Select an instrument and wait for a real candle series.</p>
+                  </div>
+                )}
+              </div>
+            </section>
+
+            <section className="card">
+              <div className="card-header">
+                <div>
+                  <h3 className="card-title">Candle provenance</h3>
+                  <span className="hint">Where this series came from</span>
+                </div>
+                {series?.proxy && <span className="badge proxy">Proxy series</span>}
+              </div>
+              <div className="card-body">
+                {series ? (
+                  <Provenance
+                    series={series}
+                    cached={candles.data?.cached ?? false}
+                    precision={precision}
+                  />
+                ) : (
+                  <div className="empty-state">
+                    <LineChart size={24} />
+                    <h3>No candle series yet</h3>
+                    <p>Select an instrument and timeframe to load provider data.</p>
+                  </div>
+                )}
+              </div>
+            </section>
           </div>
-          <div className="card-body">
+
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">Recent candles</h3>
+              <span className="badge">
+                {series ? `${series.candles.length} candles` : 'No data'}
+              </span>
+            </div>
             {series ? (
-              <Provenance
-                series={series}
-                cached={candles.data?.cached ?? false}
-                precision={precision}
-              />
+              <CandleTable series={series} precision={precision} />
             ) : (
               <div className="empty-state">
                 <LineChart size={24} />
-                <h3>No candle series yet</h3>
-                <p>Select an instrument and timeframe to load provider data.</p>
+                <h3>No candles to display</h3>
+                <p>The table appears only when a real provider series is available.</p>
               </div>
             )}
-          </div>
-        </section>
-      </div>
+            {series && (
+              <div className="card-footer">
+                Provider: {series.provider.displayName} · Quality:{' '}
+                {QUALITY_LABEL[series.quality]} · Fetched {formatUtc(series.fetchedAt, true)}
+              </div>
+            )}
+          </section>
 
-      <section className="card">
-        <div className="card-header">
-          <h3 className="card-title">Recent candles</h3>
-          <span className="badge">
-            {series ? `${series.candles.length} candles` : 'No data'}
-          </span>
-        </div>
-        {series ? (
-          <CandleTable series={series} precision={precision} />
-        ) : (
-          <div className="empty-state">
-            <LineChart size={24} />
-            <h3>No candles to display</h3>
-            <p>The table appears only when a real provider series is available.</p>
-          </div>
-        )}
-        {series && (
-          <div className="card-footer">
-            Provider: {series.provider.displayName} · Quality:{' '}
-            {QUALITY_LABEL[series.quality]} · Fetched {formatUtc(series.fetchedAt, true)}
-          </div>
-        )}
-      </section>
-
-      <section className="card">
-        <div className="card-header">
-          <h3 className="card-title">Market provider health</h3>
-          <span className="badge">Live status</span>
-        </div>
-        {providers.isLoading ? (
-          <div className="card-body">
-            <div className="loading">
-              <span className="spinner" /> Loading provider health…
+          <section className="card">
+            <div className="card-header">
+              <h3 className="card-title">Market provider health</h3>
+              <span className="badge">Live status</span>
             </div>
-          </div>
-        ) : (
-          <ProviderTable providers={marketProviders} />
-        )}
-      </section>
+            {providers.isLoading ? (
+              <div className="card-body">
+                <div className="loading">
+                  <span className="spinner" /> Loading provider health…
+                </div>
+              </div>
+            ) : (
+              <ProviderTable providers={marketProviders} />
+            )}
+          </section>
+        </div>
+      </div>
     </div>
   );
 }

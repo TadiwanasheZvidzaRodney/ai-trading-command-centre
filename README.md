@@ -9,9 +9,10 @@ trade planning, risk controls, paper trading, journaling and backtesting in one 
 > default and is not implemented. Market data can be delayed, incomplete or wrong.
 
 **Current status:** Phase 0 (architecture and provider decisions), Phase 1
-(foundation) and Phase 2 (real market data) are implemented. Feature phases are being
-built incrementally. See [`docs/implementation-plan.md`](docs/implementation-plan.md) for
-the live status and acceptance evidence.
+(foundation), Phase 2 (real market data) and Phase 3 (trading workspace) are
+implemented. Feature phases are being built incrementally. See
+[`docs/implementation-plan.md`](docs/implementation-plan.md) for the live status and
+acceptance evidence.
 
 ## Principles
 
@@ -97,7 +98,9 @@ npm run dev
 ```
 
 - Web: <http://localhost:3000>
-- Markets (quotes, candles, provenance): <http://localhost:3000/markets>
+- Markets (watchlist, candlestick chart, provenance): <http://localhost:3000/markets>
+- Tasks (preparation tasks and reminders): <http://localhost:3000/tasks>
+- Calendar (UTC week view; event ingestion lands in Phase 4): <http://localhost:3000/calendar>
 - API: <http://localhost:4000>
 - API health: <http://localhost:4000/health>
 - OpenAPI UI: <http://localhost:4000/docs> (development only)

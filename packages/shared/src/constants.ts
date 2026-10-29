@@ -1,4 +1,4 @@
-import type { Instrument, InstrumentSymbol, Timeframe } from './types.js';
+import type { Instrument, InstrumentSymbol, Timeframe } from './types';
 
 export const APP_NAME = 'AI Trading Command Centre';
 export const DEFAULT_TIMEZONE = 'Africa/Harare';
