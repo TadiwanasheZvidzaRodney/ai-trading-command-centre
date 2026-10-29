@@ -1,0 +1,15 @@
+{
+  "prices": [
+    {
+      "type": "PRICE",
+      "instrument": "XAU_USD",
+      "time": "2026-10-27T12:00:00.123456789Z",
+      "status": "tradeable",
+      "tradeable": true,
+      "bids": [{ "price": "4014.494", "liquidity": 1000000 }],
+      "asks": [{ "price": "4015.156", "liquidity": 1000000 }],
+      "closeoutBid": "4014.480",
+      "closeoutAsk": "4015.170"
+    }
+  ]
+}

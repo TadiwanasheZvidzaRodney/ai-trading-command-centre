@@ -1,0 +1,36 @@
+{
+  "meta": {
+    "symbol": "XAU/USD",
+    "interval": "1day",
+    "currency": "USD",
+    "exchange": "FOREX",
+    "type": "Physical Currency"
+  },
+  "values": [
+    {
+      "datetime": "2026-10-27",
+      "open": "4010.00",
+      "high": "4018.00",
+      "low": "4008.00",
+      "close": "4014.80",
+      "volume": "0"
+    },
+    {
+      "datetime": "2026-10-26",
+      "open": "4005.00",
+      "high": "4012.00",
+      "low": "4001.00",
+      "close": "4011.20",
+      "volume": "0"
+    },
+    {
+      "datetime": "2026-10-23",
+      "open": "3998.00",
+      "high": "4007.00",
+      "low": "3995.00",
+      "close": "4005.00",
+      "volume": "0"
+    }
+  ],
+  "status": "ok"
+}

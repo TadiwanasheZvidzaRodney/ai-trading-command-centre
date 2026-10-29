@@ -8,10 +8,10 @@ trade planning, risk controls, paper trading, journaling and backtesting in one 
 > It starts in research mode and moves to paper trading. Live execution is disabled by
 > default and is not implemented. Market data can be delayed, incomplete or wrong.
 
-**Current status:** Phase 0 (architecture and provider decisions) and Phase 1
-(foundation) are implemented. Feature phases are being built incrementally. See
-[`docs/implementation-plan.md`](docs/implementation-plan.md) for the live status and
-acceptance evidence.
+**Current status:** Phase 0 (architecture and provider decisions), Phase 1
+(foundation) and Phase 2 (real market data) are implemented. Feature phases are being
+built incrementally. See [`docs/implementation-plan.md`](docs/implementation-plan.md) for
+the live status and acceptance evidence.
 
 ## Principles
 
@@ -97,6 +97,7 @@ npm run dev
 ```
 
 - Web: <http://localhost:3000>
+- Markets (quotes, candles, provenance): <http://localhost:3000/markets>
 - API: <http://localhost:4000>
 - API health: <http://localhost:4000/health>
 - OpenAPI UI: <http://localhost:4000/docs> (development only)

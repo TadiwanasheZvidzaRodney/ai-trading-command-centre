@@ -878,6 +878,183 @@ td strong {
 
 /* ---------- Responsive ---------- */
 
+/* ---------- Markets ---------- */
+
+.quote-card .card-header {
+  align-items: flex-start;
+}
+
+.quote-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  justify-content: flex-end;
+}
+
+.quote-mid {
+  font-size: 30px;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+
+.quote-pairs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.quote-pairs > div {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--panel-2);
+}
+
+.quote-pairs .muted {
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.quote-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 12px;
+  color: var(--text-muted);
+  font-size: 11px;
+}
+
+.quote-meta .mono {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.quote-note {
+  margin-top: 10px;
+  line-height: 1.5;
+}
+
+.markets-main {
+  align-items: start;
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  background: var(--panel-2);
+}
+
+.segmented-item {
+  border: 0;
+  border-radius: 999px;
+  padding: 4px 9px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.segmented-item:hover {
+  color: var(--text);
+}
+
+.segmented-item.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.instrument-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 14px;
+}
+
+.instrument-tab {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: var(--panel-2);
+  color: var(--text-muted);
+  font: inherit;
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.instrument-tab:hover {
+  border-color: var(--border-strong);
+  color: var(--text);
+}
+
+.instrument-tab.active {
+  border-color: rgba(45, 212, 191, 0.35);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+
+.candle-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.candle-preview svg {
+  width: 100%;
+  height: auto;
+  min-height: 220px;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.015), transparent 60%),
+    var(--bg-elevated);
+}
+
+.candle-grid {
+  stroke: var(--border);
+  stroke-width: 1;
+}
+
+.candle-axis {
+  fill: var(--text-dim);
+  font-family: var(--font-mono);
+  font-size: 10px;
+}
+
+.candle-legend {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+.notes {
+  margin: 6px 0 0;
+  padding-left: 18px;
+  color: var(--text-muted);
+  font-size: 11.5px;
+  line-height: 1.55;
+}
+
+.notes li + li {
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .quote-pairs {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 1100px) {
   .grid-4 {
     grid-template-columns: repeat(2, minmax(0, 1fr));

@@ -1,4 +1,5 @@
 import type { Env } from '@atc/config';
+import type { MarketDataService } from '@atc/market-data';
 import type { ProviderHealth } from '@atc/shared';
 import { nowIso } from '@atc/shared';
 import type { FastifyInstance } from 'fastify';
@@ -6,62 +7,8 @@ import type { DatabaseLike } from '../db/mongo.js';
 
 const VERSION = '0.1.0';
 
-function providerHealth(env: Env): ProviderHealth[] {
-  const quoteConfigured =
-    env.MARKET_DATA_QUOTE_PROVIDER === 'swissquote' ||
-    (env.MARKET_DATA_QUOTE_PROVIDER === 'twelvedata' &&
-      Boolean(env.MARKET_DATA_TWELVE_DATA_API_KEY)) ||
-    (env.MARKET_DATA_QUOTE_PROVIDER === 'oanda' &&
-      Boolean(env.MARKET_DATA_OANDA_API_TOKEN && env.MARKET_DATA_OANDA_ACCOUNT_ID));
-
-  const candleConfigured =
-    env.MARKET_DATA_CANDLE_PROVIDER === 'yahoo' ||
-    (env.MARKET_DATA_CANDLE_PROVIDER === 'twelvedata' &&
-      Boolean(env.MARKET_DATA_TWELVE_DATA_API_KEY)) ||
-    (env.MARKET_DATA_CANDLE_PROVIDER === 'oanda' &&
-      Boolean(env.MARKET_DATA_OANDA_API_TOKEN && env.MARKET_DATA_OANDA_ACCOUNT_ID));
-
+function nonMarketProviderHealth(env: Env): ProviderHealth[] {
   return [
-    {
-      providerId: env.MARKET_DATA_QUOTE_PROVIDER,
-      displayName:
-        env.MARKET_DATA_QUOTE_PROVIDER === 'swissquote'
-          ? 'Swissquote public quotes'
-          : env.MARKET_DATA_QUOTE_PROVIDER === 'twelvedata'
-            ? 'Twelve Data'
-            : 'OANDA practice',
-      category: 'market-data',
-      status: quoteConfigured ? 'degraded' : 'not_configured',
-      configured: quoteConfigured,
-      quality: 'reference',
-      lastSuccessAt: null,
-      lastErrorAt: null,
-      lastError: null,
-      latencyMs: null,
-      message: quoteConfigured
-        ? 'Configured; live health sampling starts with the market-data module.'
-        : 'Provider credentials are not configured.',
-    },
-    {
-      providerId: env.MARKET_DATA_CANDLE_PROVIDER,
-      displayName:
-        env.MARKET_DATA_CANDLE_PROVIDER === 'yahoo'
-          ? 'Yahoo Finance chart (reference)'
-          : env.MARKET_DATA_CANDLE_PROVIDER === 'twelvedata'
-            ? 'Twelve Data'
-            : 'OANDA practice',
-      category: 'market-data',
-      status: candleConfigured ? 'degraded' : 'not_configured',
-      configured: candleConfigured,
-      quality: 'reference',
-      lastSuccessAt: null,
-      lastErrorAt: null,
-      lastError: null,
-      latencyMs: null,
-      message: candleConfigured
-        ? 'Configured; live health sampling starts with the market-data module.'
-        : 'Provider credentials are not configured.',
-    },
     {
       providerId: env.NEWS_PROVIDER,
       displayName: 'Public RSS news',
@@ -119,9 +66,9 @@ function providerHealth(env: Env): ProviderHealth[] {
 
 export async function registerHealthRoutes(
   app: FastifyInstance,
-  options: { env: Env; db: DatabaseLike },
+  options: { env: Env; db: DatabaseLike; marketData: MarketDataService },
 ): Promise<void> {
-  const { env, db } = options;
+  const { env, db, marketData } = options;
 
   app.get('/health/live', async () => ({
     status: 'ok',
@@ -166,7 +113,7 @@ export async function registerHealthRoutes(
   });
 
   app.get('/health/providers', async () => ({
-    providers: providerHealth(env),
+    providers: [...marketData.getProviderHealth(), ...nonMarketProviderHealth(env)],
     timestamp: nowIso(),
   }));
 }

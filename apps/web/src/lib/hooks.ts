@@ -1,6 +1,14 @@
 'use client';
 
-import type { ProviderHealth } from '@atc/shared';
+import type {
+  CandleSeries,
+  Instrument,
+  InstrumentSymbol,
+  ProviderHealth,
+  ProviderInfo,
+  Quote,
+  Timeframe,
+} from '@atc/shared';
 import useSWR, { type SWRConfiguration } from 'swr';
 import { api } from './api';
 
@@ -70,4 +78,54 @@ export function useAuthStatus() {
 
 export function useSystemInfo() {
   return useApi<SystemInfoResponse>('/api/v1/system/info');
+}
+
+export interface InstrumentsResponse {
+  instruments: Instrument[];
+  providers: { quote: ProviderInfo; candle: ProviderInfo };
+  timestamp: string;
+}
+
+export interface MarketQuote extends Quote {
+  cached: boolean;
+}
+
+export interface MarketQuoteError {
+  instrument: InstrumentSymbol;
+  code: string;
+  message: string;
+}
+
+export interface QuotesResponse {
+  quotes: MarketQuote[];
+  errors: MarketQuoteError[];
+  fetchedAt: string;
+  timestamp: string;
+}
+
+export interface CandlesResponse {
+  series: CandleSeries;
+  cached: boolean;
+  timestamp: string;
+}
+
+export function useInstruments() {
+  return useApi<InstrumentsResponse>('/api/v1/instruments', {
+    refreshInterval: 300_000,
+  });
+}
+
+export function useMarketQuotes() {
+  return useApi<QuotesResponse>('/api/v1/market/quotes', {
+    refreshInterval: 15_000,
+  });
+}
+
+export function useCandles(instrument: InstrumentSymbol | null, timeframe: Timeframe) {
+  return useApi<CandlesResponse>(
+    instrument
+      ? `/api/v1/market/candles/${instrument}?timeframe=${timeframe}&limit=60`
+      : null,
+    { refreshInterval: 60_000 },
+  );
 }

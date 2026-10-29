@@ -1,7 +1,7 @@
 # Implementation Plan
 
-**Last updated:** 2026-10-27
-**Current phase:** Phase 1 complete. Phase 2 is next.
+**Last updated:** 2026-10-29
+**Current phase:** Phase 2 complete. Phase 3 is next.
 
 Status legend: `[ ]` not started, `[~]` in progress, `[x]` complete with evidence.
 
@@ -63,20 +63,44 @@ app renders the status page; no secrets are committed.
 
 Goal: verified real quotes and candles with provenance, freshness and quality flags.
 
-- [ ] Provider interface and registry.
-- [ ] Swissquote quote adapter (no key).
-- [ ] Yahoo candle adapter (no key), with labelled `GC=F` proxy for XAU/USD.
-- [ ] Twelve Data and OANDA adapters (disabled without credentials).
-- [ ] Caching, timeouts, retries and provider health.
-- [ ] Quote/candle validation, deduplication, sorting and gap flags.
-- [ ] MongoDB persistence for quotes/candles.
-- [ ] API routes for quotes, candles, instruments and provider health.
-- [ ] Contract/unit tests with recorded fixtures.
-- [ ] Live smoke check showing real timestamps in the API and UI.
+- [x] Provider interface and registry.
+- [x] Swissquote quote adapter (no key).
+- [x] Yahoo candle adapter (no key), with labelled `GC=F` proxy for XAU/USD.
+- [x] Twelve Data and OANDA adapters (disabled without credentials).
+- [x] Caching, timeouts, retries and provider health.
+- [x] Quote/candle validation, deduplication, sorting and gap flags.
+- [x] MongoDB persistence for quotes/candles.
+- [x] API routes for quotes, candles, instruments and provider health.
+- [x] Contract/unit tests with recorded fixtures.
+- [x] Live smoke check showing real timestamps in the API and UI.
 
 **Acceptance criteria:** the UI shows provider, instrument, observation time, age and
 quality tier; a provider failure produces a visible error/stale state, never a fabricated
 quote; gold proxy data is unmistakably labelled.
+
+**Verified 2026-10-29:**
+- `npm run lint` — clean, 0 errors and 0 warnings.
+- `npm run typecheck` — API, web, config, market-data and shared workspaces pass.
+- `npm test` — 15 files, 83 tests passed.
+- `npm run build` — API ESM bundle 168.21 KB; Next.js production build completed with
+  14 static routes including `/markets`.
+- Live API smoke against `http://127.0.0.1:4000`:
+  - `/api/v1/instruments` returned XAU/USD, EUR/USD and GBP/USD, with XAU/USD
+    `candleProxySymbol: "GC=F"`.
+  - `/api/v1/market/quotes` returned live Swissquote quotes with provider, observation
+    time, age, quality and cache metadata.
+  - `/api/v1/market/candles/XAU/USD?timeframe=1d` returned 60 Yahoo `GC=F` candles with
+    `quality: "proxy"`, `proxyFor: "XAU/USD"` and explicit proxy notes.
+  - `/api/v1/market/candles/EUR/USD?timeframe=4h` returned UTC-aggregated 4h candles.
+  - `/health/providers` reported Swissquote and Yahoo `ok`, RSS/calendar `degraded`
+    (not yet ingested) and AI `not_configured`.
+  - Invalid instruments and timeframes returned structured `400 VALIDATION_ERROR`
+    responses.
+- Browser at `http://localhost:3000/markets`: quote cards, instrument/timeframe
+  switching, SVG candle preview, provenance panel, proxy badges, recent-candle table and
+  market-provider health rendered with live data and no console errors.
+- Twelve Data and OANDA adapters are fixture-tested only; no live keys have been used, so
+  their real network behaviour remains unverified. They stay disabled without credentials.
 
 ## Phase 3 - Trading workspace
 

@@ -5,6 +5,7 @@ import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import type { Env } from '@atc/config';
+import { MarketDataError, MarketDataService } from '@atc/market-data';
 import Fastify, {
   type FastifyInstance,
   type FastifyServerOptions,
@@ -17,103 +18,29 @@ import type { DatabaseLike } from './db/mongo.js';
 import { AppError, zodDetails } from './errors.js';
 import { registerHealthRoutes } from './health/routes.js';
 import { loggerOptions } from './logger.js';
+import { MongoMarketDataStore } from './market/repository.js';
+import { registerMarketRoutes } from './market/routes.js';
 import { registerSystemRoutes } from './system/routes.js';
 
 const VERSION = '0.1.0';
 
-export interface BuildServerOptions {
-  env: Env;
-  db: DatabaseLike;
-  logger?: FastifyServerOptions['logger'];
-}
-
-export async function buildServer(options: BuildServerOptions): Promise<FastifyInstance> {
-  const { env, db } = options;
-
-  const app = Fastify({
-    logger: options.logger !== undefined ? options.logger : loggerOptions(env),
-    genReqId: (request) =>
-      typeof request.headers['x-request-id'] === 'string'
-        ? request.headers['x-request-id']
-        : randomUUID(),
-    requestIdHeader: 'x-request-id',
-    trustProxy: env.NODE_ENV === 'production',
-    bodyLimit: 1_048_576,
-  });
-
-  await app.register(cookie, { secret: env.SESSION_SECRET });
-
-  await app.register(helmet, {
-    contentSecurityPolicy: false,
-    crossOriginResourcePolicy: { policy: 'same-site' },
-  });
-
-  await app.register(cors, {
-    origin: env.WEB_URL,
-    credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
-  });
-
-  await app.register(rateLimit, {
-    max: env.RATE_LIMIT_MAX,
-    timeWindow: env.RATE_LIMIT_WINDOW,
-    allowList: (request) =>
-      request.url.startsWith('/health') || request.url.startsWith('/docs'),
-  });
-
-  if (env.NODE_ENV !== 'production') {
-    await app.register(swagger, {
-      openapi: {
-        info: {
-          title: 'AI Trading Command Centre API',
-          version: VERSION,
-          description:
-            'Personal trading research API. Research and paper trading only; live execution is not implemented.',
-        },
-        servers: [{ url: env.API_URL }],
-        components: {
-          securitySchemes: {
-            cookieAuth: { type: 'apiKey', in: 'cookie', name: 'atc_session' },
-          },
-        },
-      },
-    });
-  }
-
-  await registerAuth(app, { env, db });
-  await registerHealthRoutes(app, { env, db });
-  await registerAuthRoutes(app, { env, db });
-  await registerSystemRoutes(app, { env });
-
-  app.get('/', async () => ({
-    name: 'AI Trading Command Centre API',
-    version: VERSION,
-    status: 'ok',
-    health: '/health',
-    docs: env.NODE_ENV !== 'production' ? '/docs' : null,
-    liveTradingEnabled: false,
-  }));
-
-  if (env.NODE_ENV !== 'production') {
-    await app.register(swaggerUi, {
-      routePrefix: '/docs',
-      uiConfig: { docExpansion: 'list', deepLinking: true },
-    });
-  }
-
-  app.setNotFoundHandler((request, reply) => {
-    reply.code(404).send({
-      error: {
-        code: 'NOT_FOUND',
-        message: 'Route not found',
-        requestId: request.id,
-      },
-    });
-  });
-
+function registerErrorHandler(app: FastifyInstance): void {
   app.setErrorHandler((error, request, reply) => {
     if (error instanceof AppError) {
       reply.code(error.statusCode).send({
+        error: {
+          code: error.code,
+          message: error.message,
+          details: error.details,
+          requestId: request.id,
+        },
+      });
+      return;
+    }
+
+    if (error instanceof MarketDataError) {
+      const statusCode = error.code === 'PROVIDER_INVALID_RESPONSE' ? 502 : 503;
+      reply.code(statusCode).send({
         error: {
           code: error.code,
           message: error.message,
@@ -164,6 +91,113 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
       error: {
         code: 'INTERNAL_ERROR',
         message: 'An unexpected error occurred',
+        requestId: request.id,
+      },
+    });
+  });
+}
+
+export interface BuildServerOptions {
+  env: Env;
+  db: DatabaseLike;
+  logger?: FastifyServerOptions['logger'];
+  marketData?: MarketDataService;
+}
+
+export async function buildServer(options: BuildServerOptions): Promise<FastifyInstance> {
+  const { env, db } = options;
+
+  const app = Fastify({
+    logger: options.logger !== undefined ? options.logger : loggerOptions(env),
+    genReqId: (request) =>
+      typeof request.headers['x-request-id'] === 'string'
+        ? request.headers['x-request-id']
+        : randomUUID(),
+    requestIdHeader: 'x-request-id',
+    trustProxy: env.NODE_ENV === 'production',
+    bodyLimit: 1_048_576,
+  });
+
+  registerErrorHandler(app);
+
+  const marketData =
+    options.marketData ??
+    new MarketDataService({
+      env,
+      store: new MongoMarketDataStore(db.db),
+      logger: {
+        warn: (context, message) => app.log.warn(context, message),
+        error: (context, message) => app.log.error(context, message),
+      },
+    });
+
+  await app.register(cookie, { secret: env.SESSION_SECRET });
+
+  await app.register(helmet, {
+    contentSecurityPolicy: false,
+    crossOriginResourcePolicy: { policy: 'same-site' },
+  });
+
+  await app.register(cors, {
+    origin: env.WEB_URL,
+    credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  });
+
+  await app.register(rateLimit, {
+    max: env.RATE_LIMIT_MAX,
+    timeWindow: env.RATE_LIMIT_WINDOW,
+    allowList: (request) =>
+      request.url.startsWith('/health') || request.url.startsWith('/docs'),
+  });
+
+  if (env.NODE_ENV !== 'production') {
+    await app.register(swagger, {
+      openapi: {
+        info: {
+          title: 'AI Trading Command Centre API',
+          version: VERSION,
+          description:
+            'Personal trading research API. Research and paper trading only; live execution is not implemented.',
+        },
+        servers: [{ url: env.API_URL }],
+        components: {
+          securitySchemes: {
+            cookieAuth: { type: 'apiKey', in: 'cookie', name: 'atc_session' },
+          },
+        },
+      },
+    });
+  }
+
+  await registerAuth(app, { env, db });
+  await registerHealthRoutes(app, { env, db, marketData });
+  await registerAuthRoutes(app, { env, db });
+  await registerMarketRoutes(app, { marketData });
+  await registerSystemRoutes(app, { env });
+
+  app.get('/', async () => ({
+    name: 'AI Trading Command Centre API',
+    version: VERSION,
+    status: 'ok',
+    health: '/health',
+    docs: env.NODE_ENV !== 'production' ? '/docs' : null,
+    marketData: '/api/v1/market/quotes',
+    liveTradingEnabled: false,
+  }));
+
+  if (env.NODE_ENV !== 'production') {
+    await app.register(swaggerUi, {
+      routePrefix: '/docs',
+      uiConfig: { docExpansion: 'list', deepLinking: true },
+    });
+  }
+
+  app.setNotFoundHandler((request, reply) => {
+    reply.code(404).send({
+      error: {
+        code: 'NOT_FOUND',
+        message: 'Route not found',
         requestId: request.id,
       },
     });

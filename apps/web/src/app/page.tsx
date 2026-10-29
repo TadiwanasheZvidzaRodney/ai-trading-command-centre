@@ -1,6 +1,6 @@
 'use client';
 
-import { AlertTriangle, CheckCircle2, Circle, Database, Gauge, Server, ShieldCheck } from 'lucide-react';
+import { AlertTriangle, CheckCircle2, Circle, Database, Gauge, LineChart, Server, ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import { ProviderTable } from '@/components/ProviderTable';
 import { useAuthStatus, useHealth, useProviders, useSystemInfo } from '@/lib/hooks';
@@ -41,7 +41,7 @@ export default function OverviewPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 1 · Foundation</span>
+          <span className="pill accent">Phase 2 · Market data</span>
           <h2>Research first. Risk before reward.</h2>
           <p>
             A personal workspace for XAU/USD, EUR/USD and GBP/USD. Real data, deterministic
@@ -131,7 +131,7 @@ export default function OverviewPage() {
         <section className="card">
           <div className="card-header">
             <h3 className="card-title">Foundation checklist</h3>
-            <span className="badge ok">Phase 1</span>
+            <span className="badge ok">Phase 2</span>
           </div>
           <div className="card-body">
             <ul className="checklist">
@@ -151,9 +151,9 @@ export default function OverviewPage() {
                 <CheckCircle2 size={15} />
                 <span>Single-user auth plumbing with session cookies and CSRF protection.</span>
               </li>
-              <li className="pending">
-                <Circle size={15} />
-                <span>Real market-data adapters and provenance-aware charts (Phase 2–3).</span>
+              <li className="done">
+                <CheckCircle2 size={15} />
+                <span>Real quote and candle adapters with provenance, freshness and proxy labels (Phase 2).</span>
               </li>
               <li className="pending">
                 <Circle size={15} />
@@ -162,6 +162,9 @@ export default function OverviewPage() {
             </ul>
           </div>
           <div className="card-footer">
+            <Link href="/markets" className="btn btn-sm">
+              <LineChart size={13} /> Open Markets
+            </Link>
             <Link href="/settings" className="btn btn-sm">
               <Server size={13} /> View system configuration
             </Link>
@@ -216,15 +219,15 @@ export default function OverviewPage() {
         <section className="card">
           <div className="card-header">
             <h3 className="card-title">Next milestone</h3>
-            <span className="badge accent">Phase 2</span>
+            <span className="badge accent">Phase 3</span>
           </div>
           <div className="card-body stack small muted">
             <p>
-              Connect the free quote and candle adapters, persist observations, and surface
-              provider, timestamp, age and quality on every quote and chart.
+              Turn the Markets page into a full research workspace: richer charting,
+              watchlists, instrument detail and task reminders.
             </p>
             <p className="hint">
-              Gold history will be labelled as a COMEX futures proxy until a direct XAU/USD
+              Gold history stays labelled as a COMEX futures proxy until a direct XAU/USD
               provider is configured.
             </p>
           </div>
