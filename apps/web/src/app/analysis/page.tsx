@@ -202,7 +202,7 @@ export default function AnalysisPage() {
                     {candles.data && technical.data ? (
                       <ChartWithIndicators
                         series={candles.data.series}
-                        technical={technical.data}
+                        technical={technical.data as unknown as any}
                         pricePrecision={precision}
                         tickSize={tickSize}
                       />
@@ -236,7 +236,7 @@ export default function AnalysisPage() {
                     )}
                   </div>
                   <div className="card-body">
-                    <StructurePanel structure={structure.data?.structure ?? null} />
+                    <StructurePanel structure={structure.data?.structure as unknown as any ?? null} />
                   </div>
                 </div>
               )}

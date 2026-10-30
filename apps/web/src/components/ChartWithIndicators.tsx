@@ -213,19 +213,16 @@ export function ChartWithIndicators({
         bbUpperSeries = chart.addSeries(LineSeries, {
           color: 'rgba(239, 68, 68, 0.5)',
           lineWidth: 1,
-          lineStyle: 2,
           priceFormat: { type: 'price', precision: pricePrecision },
         });
         bbMiddleSeries = chart.addSeries(LineSeries, {
           color: 'rgba(251, 191, 36, 0.5)',
           lineWidth: 1,
-          lineStyle: 2,
           priceFormat: { type: 'price', precision: pricePrecision },
         });
         bbLowerSeries = chart.addSeries(LineSeries, {
           color: 'rgba(34, 211, 153, 0.5)',
           lineWidth: 1,
-          lineStyle: 2,
           priceFormat: { type: 'price', precision: pricePrecision },
         });
 
