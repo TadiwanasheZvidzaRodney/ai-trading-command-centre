@@ -3,7 +3,11 @@
 import type { TechnicalIndicators } from '@atc/technical-analysis';
 import { formatIndicator, formatPercent } from '@/lib/format';
 
-export function TechnicalIndicatorsLegend({ data }: { data: TechnicalIndicators | null }) {
+export function TechnicalIndicatorsLegend({ 
+  data 
+}: { 
+  data: (TechnicalIndicators & { timestamp?: string | number }) | null 
+}) {
   if (!data) return null;
 
   const current = data.indicators;

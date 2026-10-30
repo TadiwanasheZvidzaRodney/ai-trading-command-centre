@@ -49,8 +49,11 @@ describe('SMA - Simple Moving Average', () => {
     const result = sma(candles, 20);
     const validValues = result.filter((v) => v !== null) as number[];
     for (let i = 1; i < validValues.length; i++) {
-      // Generally increasing in uptrend
-      expect(validValues[i]).toBeGreaterThan(validValues[i - 1] - 0.001); // Allow small tolerance
+      const prev = validValues[i - 1];
+      if (prev !== undefined) {
+        // Generally increasing in uptrend
+        expect(validValues[i]).toBeGreaterThan(prev - 0.001); // Allow small tolerance
+      }
     }
   });
 
@@ -59,8 +62,11 @@ describe('SMA - Simple Moving Average', () => {
     const result = sma(candles, 20);
     const validValues = result.filter((v) => v !== null) as number[];
     for (let i = 1; i < validValues.length; i++) {
-      // Generally decreasing in downtrend
-      expect(validValues[i]).toBeLessThan(validValues[i - 1] + 0.001); // Allow small tolerance
+      const prev = validValues[i - 1];
+      if (prev !== undefined) {
+        // Generally decreasing in downtrend
+        expect(validValues[i]).toBeLessThan(prev + 0.001); // Allow small tolerance
+      }
     }
   });
 

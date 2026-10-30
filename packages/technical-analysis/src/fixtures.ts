@@ -159,7 +159,7 @@ export function createSmallSample(): Candle[] {
  */
 export function createFlatSample(): Candle[] {
   const candles: Candle[] = [];
-  let basePrice = 100;
+  const basePrice = 100;
 
   for (let i = 0; i < 10; i++) {
     const open = basePrice + (Math.random() - 0.5) * 0.5;

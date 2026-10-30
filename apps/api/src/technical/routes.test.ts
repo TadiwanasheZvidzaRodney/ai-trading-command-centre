@@ -325,7 +325,7 @@ describe('technical analysis API', () => {
         url: `/api/v1/technical/XAU/USD/${timeframe}?lookback=50`,
       });
 
-      expect(response.statusCode).toBe(200, `Failed for timeframe ${timeframe}`);
+      expect(response.statusCode).toBe(200);
       const body = response.json();
       expect(body.data.timeframe).toBe(timeframe);
     }

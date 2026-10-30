@@ -6,7 +6,7 @@ import type {
 import { TechnicalAnalysisService } from '@atc/technical-analysis';
 import type { MarketDataService } from '@atc/market-data';
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify';
-import { nowIso, timeframeSchema, instrumentSymbolSchema } from '@atc/shared';
+import { nowIso, timeframeSchema, instrumentSymbolSchema, type InstrumentSymbol, type Timeframe } from '@atc/shared';
 import { AppError } from '../errors.js';
 import { technicalQuerySchema } from './types.js';
 
@@ -64,8 +64,8 @@ export async function registerTechnicalRoutes(
    * Helper to fetch candles and validate
    */
   async function fetchAndValidateCandles(
-    instrument: string,
-    timeframe: string,
+    instrument: InstrumentSymbol,
+    timeframe: Timeframe,
     lookback: number,
   ) {
     try {

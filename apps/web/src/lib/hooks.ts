@@ -188,19 +188,42 @@ export function useCalendar(filters: CalendarFilters = {}) {
   });
 }
 
-export interface TechnicalResponse extends Omit<TechnicalIndicators, 'timestamp'> {
+export interface TechnicalApiResponse {
+  status: 'ok' | 'error';
+  data: TechnicalIndicators;
   timestamp: string;
 }
+
+export type TechnicalResponse = TechnicalIndicators;
 
 export function useTechnical(
   instrument: InstrumentSymbol | null,
   timeframe: Timeframe,
   lookback = 200,
 ) {
-  return useApi<TechnicalResponse>(
+  const { data, error, isLoading, mutate } = useApi<TechnicalApiResponse>(
     instrument ? `/api/v1/technical/${instrument}/${timeframe}?lookback=${lookback}` : null,
     { refreshInterval: 60_000 },
   );
+  
+  return {
+    data: data?.data ?? null,
+    error,
+    isLoading,
+    mutate,
+  };
+}
+
+export interface StructureApiResponse {
+  status: 'ok' | 'error';
+  data: {
+    trend: Structure['trend'];
+    resistance_levels: Structure['resistance_levels'];
+    support_levels: Structure['support_levels'];
+    swing_high: Structure['swing_high'];
+    swing_low: Structure['swing_low'];
+  };
+  timestamp: string;
 }
 
 export interface StructureResponse {
@@ -214,10 +237,25 @@ export function useTechnicalStructure(
   instrument: InstrumentSymbol | null,
   timeframe: Timeframe,
 ) {
-  return useApi<StructureResponse>(
+  const { data, error, isLoading, mutate } = useApi<StructureApiResponse>(
     instrument ? `/api/v1/technical/${instrument}/${timeframe}/structure` : null,
     { refreshInterval: 60_000 },
   );
+  
+  return {
+    data: data?.data ? { structure: data.data as Structure } : null,
+    error,
+    isLoading,
+    mutate,
+  };
+}
+
+export interface PatternsApiResponse {
+  status: 'ok' | 'error';
+  data: {
+    patterns: PatternDetection[];
+  };
+  timestamp: string;
 }
 
 export interface PatternsResponse {
@@ -231,8 +269,15 @@ export function useTechnicalPatterns(
   instrument: InstrumentSymbol | null,
   timeframe: Timeframe,
 ) {
-  return useApi<PatternsResponse>(
+  const { data, error, isLoading, mutate } = useApi<PatternsApiResponse>(
     instrument ? `/api/v1/technical/${instrument}/${timeframe}/patterns` : null,
     { refreshInterval: 60_000 },
   );
+  
+  return {
+    data: data?.data ?? null,
+    error,
+    isLoading,
+    mutate,
+  };
 }

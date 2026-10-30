@@ -113,7 +113,8 @@ export class ProviderHealthTracker {
       'market-data': 0,
       news: 1,
       calendar: 2,
-      ai: 3,
+      analytics: 3,
+      ai: 4,
     };
     return [...this.states.values()]
       .map((state) => ({ ...state }))

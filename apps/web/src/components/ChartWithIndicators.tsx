@@ -261,7 +261,7 @@ export function ChartWithIndicators({
           priceScaleId: 'rsi',
           priceFormat: { type: 'price', precision: 1 },
         });
-        rsiSeries.priceScale('rsi').applyOptions({
+        chart.priceScale('rsi').applyOptions({
           scaleMargins: { top: 0.7, bottom: 0 },
         });
         rsiSeries.setData(
@@ -288,7 +288,7 @@ export function ChartWithIndicators({
           priceScaleId: 'macd',
           priceFormat: { type: 'price', precision: 4 },
         });
-        macdSeries.priceScale('macd').applyOptions({
+        chart.priceScale('macd').applyOptions({
           scaleMargins: { top: 0.15, bottom: 0.15 },
         });
 
@@ -319,7 +319,7 @@ export function ChartWithIndicators({
           priceScaleId: 'atr',
           priceFormat: { type: 'price', precision: 4 },
         });
-        atrSeries.priceScale('atr').applyOptions({
+        chart.priceScale('atr').applyOptions({
           scaleMargins: { top: 0.15, bottom: 0.15 },
         });
         atrSeries.setData(
@@ -346,7 +346,7 @@ export function ChartWithIndicators({
           priceScaleId: 'stochastic',
           priceFormat: { type: 'price', precision: 1 },
         });
-        stochasticKSeries.priceScale('stochastic').applyOptions({
+        chart.priceScale('stochastic').applyOptions({
           scaleMargins: { top: 0.15, bottom: 0.15 },
         });
 
