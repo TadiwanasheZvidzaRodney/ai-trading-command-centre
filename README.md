@@ -9,10 +9,10 @@ trade planning, risk controls, paper trading, journaling and backtesting in one 
 > default and is not implemented. Market data can be delayed, incomplete or wrong.
 
 **Current status:** Phase 0 (architecture and provider decisions), Phase 1
-(foundation), Phase 2 (real market data), Phase 3 (trading workspace) and Phase 4
-(news and macro intelligence) are implemented. Feature phases are being built
-incrementally. See [`docs/implementation-plan.md`](docs/implementation-plan.md) for the
-live status and acceptance evidence.
+(foundation), Phase 2 (real market data), Phase 3 (trading workspace), Phase 4
+(news and macro intelligence) and Phase 5 framework (technical analysis) are implemented. 
+Feature phases are being built incrementally. See [`docs/implementation-plan.md`](docs/implementation-plan.md) 
+for the live status and acceptance evidence.
 
 ## Principles
 
