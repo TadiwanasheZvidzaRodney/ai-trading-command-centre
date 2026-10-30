@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@atc/config": "*",
+    "@atc/ai-copilot": "*",
     "@atc/economic-calendar": "*",
     "@atc/market-data": "*",
     "@atc/news": "*",

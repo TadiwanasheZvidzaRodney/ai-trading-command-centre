@@ -31,6 +31,7 @@ import { registerSystemRoutes } from './system/routes.js';
 import { registerTechnicalRoutes } from './technical/routes.js';
 import { MongoTaskStore, type TaskStore } from './tasks/repository.js';
 import { registerTaskRoutes } from './tasks/routes.js';
+import { registerCopilotRoutes, type AIAnalysisService } from './copilot/routes.js';
 
 const VERSION = '0.1.0';
 
@@ -115,6 +116,7 @@ export interface BuildServerOptions {
   taskStore?: TaskStore;
   news?: NewsService;
   calendar?: CalendarService;
+  aiAnalysis?: AIAnalysisService;
 }
 
 export async function buildServer(options: BuildServerOptions): Promise<FastifyInstance> {
@@ -208,12 +210,15 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   }
 
   await registerAuth(app, { env, db });
-  await registerHealthRoutes(app, { env, db, marketData, news, calendar });
+  await registerHealthRoutes(app, { env, db, marketData, news, calendar, aiAnalysis: options.aiAnalysis });
   await registerAuthRoutes(app, { env, db });
   await registerMarketRoutes(app, { marketData });
   await registerTechnicalRoutes(app, { marketData });
   await registerTaskRoutes(app, { store: taskStore });
   await registerIntelligenceRoutes(app, { news, calendar });
+  if (options.aiAnalysis) {
+    await registerCopilotRoutes(app, { aiAnalysis: options.aiAnalysis });
+  }
   await registerSystemRoutes(app, { env });
 
   app.get('/', async () => ({

@@ -14,6 +14,7 @@ import type {
   Timeframe,
 } from '@atc/shared';
 import type { TechnicalIndicators, Structure, PatternDetection } from '@atc/technical-analysis';
+import { useCallback, useEffect, useState } from 'react';
 import useSWR, { type SWRConfiguration } from 'swr';
 import { api } from './api';
 
@@ -280,4 +281,130 @@ export function useTechnicalPatterns(
     isLoading,
     mutate,
   };
+}
+
+/* ---------- Copilot Analysis ---------- */
+
+export interface CopilotAnalysisRequest {
+  instrument: InstrumentSymbol;
+  timeframe: Timeframe;
+  lookback: number;
+  model?: 'gemini' | 'ollama' | 'auto';
+  temperature?: number;
+  include_history?: boolean;
+}
+
+export interface CopilotAnalysisResponse {
+  report: string; // Markdown
+  model: string | null;
+  model_version?: string;
+  temperature: number;
+  generated_at: string;
+  inference_time_ms: number;
+  input_hash: string;
+  fallback?: boolean;
+  fallback_reason?: string;
+  evidence: {
+    instrument: string;
+    timeframe: string;
+    lookback: number;
+    candle_count: number;
+    latest_candle_time: string;
+    indicators_used: string[];
+    patterns_detected: Array<{ type: string; confidence: number; candle_index: number }>;
+    quote: { bid: number; ask: number; mid: number; spread: number; fetched_at: string };
+    structure: {
+      trend: 'uptrend' | 'downtrend' | 'range';
+      trend_strength: number;
+      resistance_levels: Array<{ price: number; touches: number; recent_bounce?: string }>;
+      support_levels: Array<{ price: number; touches: number; recent_bounce?: string }>;
+    };
+    macro_events: Array<{ event: string; time: string; impact: string; hours_until: number }>;
+    recent_news_themes: string[];
+  };
+}
+
+export interface CopilotHistoryResponse {
+  reports: Array<{
+    input_hash: string;
+    generated_at: string;
+    model: string | null;
+    summary?: string;
+  }>;
+}
+
+export function useCopilotAnalysis(
+  instrument: InstrumentSymbol | null,
+  timeframe: Timeframe,
+  lookback: number = 200,
+) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [data, setData] = useState<CopilotAnalysisResponse | null>(null);
+  const [error, setError] = useState<any>(null);
+
+  const generate = useCallback(async () => {
+    if (!instrument) return;
+
+    setIsGenerating(true);
+    setError(null);
+
+    try {
+      const response = await api.post<CopilotAnalysisResponse>(
+        '/api/v1/copilot/analyze',
+        {
+          instrument,
+          timeframe,
+          lookback,
+          model: 'auto',
+          temperature: 0.7,
+        } as CopilotAnalysisRequest,
+      );
+      setData(response);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setIsGenerating(false);
+    }
+  }, [instrument, timeframe, lookback]);
+
+  return { data, error, isGenerating, generate };
+}
+
+export function useCopilotHistory(
+  instrument: InstrumentSymbol | null,
+  timeframe: Timeframe,
+  limit: number = 10,
+) {
+  const [data, setData] = useState<CopilotHistoryResponse | null>(null);
+  const [error, setError] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetch = useCallback(async () => {
+    if (!instrument) return;
+
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await api.post<CopilotHistoryResponse>(
+        '/api/v1/copilot/history',
+        {
+          instrument,
+          timeframe,
+          limit,
+        },
+      );
+      setData(response);
+    } catch (err) {
+      setError(err);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [instrument, timeframe, limit]);
+
+  useEffect(() => {
+    void fetch();
+  }, [instrument, timeframe, fetch]);
+
+  return { data, error, isLoading, refetch: fetch };
 }

@@ -9,6 +9,7 @@ const alias = {
   '@atc/technical-analysis': path.resolve(root, 'packages/technical-analysis/src/index.ts'),
   '@atc/news': path.resolve(root, 'packages/news/src/index.ts'),
   '@atc/economic-calendar': path.resolve(root, 'packages/economic-calendar/src/index.ts'),
+  '@atc/ai-copilot': path.resolve(root, 'packages/ai-copilot/src/index.ts'),
   '@atc/ai-engine': path.resolve(root, 'packages/ai-engine/src/index.ts'),
   '@atc/risk-engine': path.resolve(root, 'packages/risk-engine/src/index.ts'),
   '@atc/trading-domain': path.resolve(root, 'packages/trading-domain/src/index.ts'),

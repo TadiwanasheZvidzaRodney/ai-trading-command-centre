@@ -22,6 +22,7 @@
       "@atc/technical-analysis": ["packages/technical-analysis/src/index.ts"],
       "@atc/news": ["packages/news/src/index.ts"],
       "@atc/economic-calendar": ["packages/economic-calendar/src/index.ts"],
+      "@atc/ai-copilot": ["packages/ai-copilot/src/index.ts"],
       "@atc/ai-engine": ["packages/ai-engine/src/index.ts"],
       "@atc/risk-engine": ["packages/risk-engine/src/index.ts"],
       "@atc/trading-domain": ["packages/trading-domain/src/index.ts"]

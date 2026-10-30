@@ -6,6 +6,7 @@ import type { ProviderHealth } from '@atc/shared';
 import { nowIso } from '@atc/shared';
 import type { FastifyInstance } from 'fastify';
 import type { DatabaseLike } from '../db/mongo.js';
+import type { AIAnalysisService } from '../copilot/routes.js';
 
 const VERSION = '0.1.0';
 
@@ -63,9 +64,10 @@ export async function registerHealthRoutes(
     marketData: MarketDataService;
     news: NewsService;
     calendar: CalendarService;
+    aiAnalysis?: AIAnalysisService;
   },
 ): Promise<void> {
-  const { env, db, marketData, news, calendar } = options;
+  const { env, db, marketData, news, calendar, aiAnalysis } = options;
 
   app.get('/health/live', async () => ({
     status: 'ok',
@@ -109,14 +111,52 @@ export async function registerHealthRoutes(
     };
   });
 
-  app.get('/health/providers', async () => ({
-    providers: [
+  app.get('/health/providers', async () => {
+    const providers: ProviderHealth[] = [
       ...marketData.getProviderHealth(),
       ...news.getProviderHealth(),
       ...calendar.getProviderHealth(),
       ...technicalAnalysisProviderHealth(),
       ...aiProviderHealth(env),
-    ],
-    timestamp: nowIso(),
-  }));
+    ];
+
+    // Add AI copilot provider health if service available
+    if (aiAnalysis) {
+      try {
+        const healthCheck = await aiAnalysis.healthCheck();
+        providers.push({
+          providerId: 'ai-copilot',
+          displayName: 'AI Copilot Analysis',
+          category: 'ai',
+          status: healthCheck.status === 'ok' ? 'ok' : 'degraded',
+          configured: true,
+          quality: 'reference',
+          lastSuccessAt: healthCheck.status === 'ok' ? nowIso() : null,
+          lastErrorAt: healthCheck.status === 'ok' ? null : nowIso(),
+          lastError: healthCheck.status === 'ok' ? null : 'Health check failed',
+          latencyMs: healthCheck.latencyMs,
+          message: `AI copilot service ${healthCheck.status === 'ok' ? 'operational' : 'degraded'}`,
+        });
+      } catch (error) {
+        providers.push({
+          providerId: 'ai-copilot',
+          displayName: 'AI Copilot Analysis',
+          category: 'ai',
+          status: 'error',
+          configured: true,
+          quality: 'reference',
+          lastSuccessAt: null,
+          lastErrorAt: nowIso(),
+          lastError: error instanceof Error ? error.message : 'Unknown error',
+          latencyMs: null,
+          message: 'AI copilot service unavailable',
+        });
+      }
+    }
+
+    return {
+      providers,
+      timestamp: nowIso(),
+    };
+  });
 }

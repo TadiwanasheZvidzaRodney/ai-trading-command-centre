@@ -25,6 +25,7 @@ const NAV_ITEMS = [
   { href: '/news', label: 'News', icon: Newspaper, phase: 4 },
   { href: '/calendar', label: 'Calendar', icon: CalendarDays, phase: 4 },
   { href: '/analysis', label: 'Analysis', icon: FlaskConical, phase: 5 },
+  { href: '/copilot', label: 'AI Copilot', icon: Activity, phase: 6 },
   { href: '/planner', label: 'Planner', icon: Gauge, phase: 7 },
   { href: '/paper', label: 'Paper trading', icon: BarChart3, phase: 7 },
   { href: '/journal', label: 'Journal', icon: BookOpen, phase: 7 },
