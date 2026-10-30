@@ -1,0 +1,46 @@
+{
+  "name": "@atc/technical-analysis",
+  "version": "0.1.0",
+  "description": "Technical analysis indicators, structure detection and strategy evaluation",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./indicators": {
+      "import": "./dist/indicators.js",
+      "types": "./dist/indicators.d.ts"
+    },
+    "./structure": {
+      "import": "./dist/structure.js",
+      "types": "./dist/structure.d.ts"
+    },
+    "./patterns": {
+      "import": "./dist/patterns.js",
+      "types": "./dist/patterns.d.ts"
+    },
+    "./strategies": {
+      "import": "./dist/strategies.js",
+      "types": "./dist/strategies.d.ts"
+    },
+    "./service": {
+      "import": "./dist/service.js",
+      "types": "./dist/service.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "echo 'Type checking only'",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@atc/shared": "workspace:*"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}

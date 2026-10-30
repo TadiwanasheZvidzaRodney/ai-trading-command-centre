@@ -16,6 +16,7 @@
     "@atc/market-data": "*",
     "@atc/news": "*",
     "@atc/shared": "*",
+    "@atc/technical-analysis": "*",
     "@fastify/cookie": "^11.1.5",
     "@fastify/cors": "^11.3.1",
     "@fastify/helmet": "^13.2.0",
