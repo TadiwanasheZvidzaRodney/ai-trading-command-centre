@@ -66,7 +66,13 @@ export function ema(candles: Candle[], period: number): (EMAValue | null)[] {
 export function rsi(candles: Candle[], period: number): RSIValue[] {
   if (period < 1 || candles.length < period + 1) return candles.map(() => null);
 
-  const result: RSIValue[] = [null];  // First candle has no previous to compare
+  const result: RSIValue[] = [];
+  
+  // Fill nulls for first period candles (no RSI yet)
+  for (let i = 0; i <= period; i++) {
+    result.push(null);
+  }
+
   let avgGain = 0;
   let avgLoss = 0;
 
@@ -82,11 +88,6 @@ export function rsi(candles: Candle[], period: number): RSIValue[] {
 
   avgGain /= period;
   avgLoss /= period;
-
-  // Calculate RSI for first period
-  const rs = avgLoss === 0 ? 100 : avgGain / avgLoss;
-  const rsi1 = 100 - 100 / (1 + rs);
-  result.push(rsi1);
 
   // Calculate RSI for remaining candles (smoothed)
   for (let i = period + 1; i < candles.length; i++) {
