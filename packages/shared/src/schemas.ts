@@ -77,7 +77,7 @@ export const candleSeriesSchema = z.object({
 export const providerHealthSchema = z.object({
   providerId: z.string().min(1).max(80),
   displayName: z.string().min(1).max(120),
-  category: z.enum(['market-data', 'news', 'calendar', 'ai']),
+  category: z.enum(['market-data', 'news', 'calendar', 'analytics', 'ai']),
   status: z.enum(['ok', 'degraded', 'error', 'not_configured']),
   configured: z.boolean(),
   quality: z.enum(['live', 'delayed', 'reference', 'proxy']),

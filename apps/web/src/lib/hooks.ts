@@ -13,6 +13,7 @@ import type {
   Task,
   Timeframe,
 } from '@atc/shared';
+import type { TechnicalIndicators, Structure, PatternDetection } from '@atc/technical-analysis';
 import useSWR, { type SWRConfiguration } from 'swr';
 import { api } from './api';
 
@@ -185,4 +186,53 @@ export function useCalendar(filters: CalendarFilters = {}) {
   return useApi<CalendarResponse>(`/api/v1/calendar${query ? `?${query}` : ''}`, {
     refreshInterval: 300_000,
   });
+}
+
+export interface TechnicalResponse extends Omit<TechnicalIndicators, 'timestamp'> {
+  timestamp: string;
+}
+
+export function useTechnical(
+  instrument: InstrumentSymbol | null,
+  timeframe: Timeframe,
+  lookback = 200,
+) {
+  return useApi<TechnicalResponse>(
+    instrument ? `/api/v1/technical/${instrument}/${timeframe}?lookback=${lookback}` : null,
+    { refreshInterval: 60_000 },
+  );
+}
+
+export interface StructureResponse {
+  structure: Structure;
+  instrument: string;
+  timeframe: string;
+  timestamp: string;
+}
+
+export function useTechnicalStructure(
+  instrument: InstrumentSymbol | null,
+  timeframe: Timeframe,
+) {
+  return useApi<StructureResponse>(
+    instrument ? `/api/v1/technical/${instrument}/${timeframe}/structure` : null,
+    { refreshInterval: 60_000 },
+  );
+}
+
+export interface PatternsResponse {
+  patterns: PatternDetection[];
+  instrument: string;
+  timeframe: string;
+  timestamp: string;
+}
+
+export function useTechnicalPatterns(
+  instrument: InstrumentSymbol | null,
+  timeframe: Timeframe,
+) {
+  return useApi<PatternsResponse>(
+    instrument ? `/api/v1/technical/${instrument}/${timeframe}/patterns` : null,
+    { refreshInterval: 60_000 },
+  );
 }

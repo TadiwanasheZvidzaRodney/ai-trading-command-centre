@@ -11,7 +11,11 @@
     "baseUrl": ".",
     "paths": {
       "@/*": ["./src/*"],
-      "@atc/shared": ["../../packages/shared/src/index.ts"]
+      "@atc/shared": ["../../packages/shared/src/index.ts"],
+      "@atc/technical-analysis": ["../../packages/technical-analysis/src/index.ts"],
+      "@atc/market-data": ["../../packages/market-data/src/index.ts"],
+      "@atc/news": ["../../packages/news/src/index.ts"],
+      "@atc/economic-calendar": ["../../packages/economic-calendar/src/index.ts"]
     }
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],

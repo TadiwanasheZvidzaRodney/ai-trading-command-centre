@@ -37,6 +37,24 @@ function aiProviderHealth(env: Env): ProviderHealth[] {
   ];
 }
 
+function technicalAnalysisProviderHealth(): ProviderHealth[] {
+  return [
+    {
+      providerId: 'technical-analysis',
+      displayName: 'Technical Analysis Service',
+      category: 'analytics',
+      status: 'ok',
+      configured: true,
+      quality: 'reference',
+      lastSuccessAt: nowIso(),
+      lastErrorAt: null,
+      lastError: null,
+      latencyMs: null,
+      message: 'Technical analysis service operational',
+    },
+  ];
+}
+
 export async function registerHealthRoutes(
   app: FastifyInstance,
   options: {
@@ -96,6 +114,7 @@ export async function registerHealthRoutes(
       ...marketData.getProviderHealth(),
       ...news.getProviderHealth(),
       ...calendar.getProviderHealth(),
+      ...technicalAnalysisProviderHealth(),
       ...aiProviderHealth(env),
     ],
     timestamp: nowIso(),

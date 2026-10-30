@@ -28,6 +28,7 @@ import { loggerOptions } from './logger.js';
 import { MongoMarketDataStore } from './market/repository.js';
 import { registerMarketRoutes } from './market/routes.js';
 import { registerSystemRoutes } from './system/routes.js';
+import { registerTechnicalRoutes } from './technical/routes.js';
 import { MongoTaskStore, type TaskStore } from './tasks/repository.js';
 import { registerTaskRoutes } from './tasks/routes.js';
 
@@ -210,6 +211,7 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   await registerHealthRoutes(app, { env, db, marketData, news, calendar });
   await registerAuthRoutes(app, { env, db });
   await registerMarketRoutes(app, { marketData });
+  await registerTechnicalRoutes(app, { marketData });
   await registerTaskRoutes(app, { store: taskStore });
   await registerIntelligenceRoutes(app, { news, calendar });
   await registerSystemRoutes(app, { env });
@@ -221,6 +223,7 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
     health: '/health',
     docs: env.NODE_ENV !== 'production' ? '/docs' : null,
     marketData: '/api/v1/market/quotes',
+    technical: '/api/v1/technical/:instrument/:timeframe',
     news: '/api/v1/news',
     calendar: '/api/v1/calendar',
     liveTradingEnabled: false,

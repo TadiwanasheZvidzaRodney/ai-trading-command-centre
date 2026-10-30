@@ -261,7 +261,7 @@ describe('market data API', () => {
     const response = await app.inject({ method: 'GET', url: '/health/providers' });
     expect(response.statusCode).toBe(200);
     const body = response.json();
-    expect(body.providers).toHaveLength(4);
+    expect(body.providers).toHaveLength(5);
     expect(body.providers[0]).toMatchObject({
       providerId: 'swissquote',
       status: 'ok',
@@ -270,6 +270,7 @@ describe('market data API', () => {
       'market-data',
       'news',
       'calendar',
+      'analytics',
       'ai',
     ]);
   });

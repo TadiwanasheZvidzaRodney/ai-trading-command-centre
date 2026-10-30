@@ -122,7 +122,7 @@ export interface MarketSummary {
 export interface ProviderHealth {
   providerId: string;
   displayName: string;
-  category: 'market-data' | 'news' | 'calendar' | 'ai';
+  category: 'market-data' | 'news' | 'calendar' | 'analytics' | 'ai';
   status: ProviderStatus;
   configured: boolean;
   quality: DataQuality;
