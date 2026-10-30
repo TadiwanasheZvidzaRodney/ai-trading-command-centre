@@ -1,9 +1,12 @@
 'use client';
 
 import type {
+  CalendarFeed,
   CandleSeries,
+  Impact,
   Instrument,
   InstrumentSymbol,
+  NewsFeed,
   ProviderHealth,
   ProviderInfo,
   Quote,
@@ -138,4 +141,48 @@ export interface TasksResponse {
 
 export function useTasks() {
   return useApi<TasksResponse>('/api/v1/tasks', { refreshInterval: 60_000 });
+}
+
+export interface NewsResponse extends NewsFeed {
+  timestamp: string;
+}
+
+export interface NewsFilters {
+  instrument?: InstrumentSymbol;
+  limit?: number;
+}
+
+export function useNews(filters: NewsFilters = {}) {
+  const params = new URLSearchParams();
+  if (filters.instrument) params.set('instrument', filters.instrument);
+  if (filters.limit) params.set('limit', String(filters.limit));
+  const query = params.toString();
+  return useApi<NewsResponse>(`/api/v1/news${query ? `?${query}` : ''}`, {
+    refreshInterval: 120_000,
+  });
+}
+
+export interface CalendarResponse extends CalendarFeed {
+  timestamp: string;
+}
+
+export interface CalendarFilters {
+  from?: string;
+  to?: string;
+  impact?: Impact;
+  instrument?: InstrumentSymbol;
+  limit?: number;
+}
+
+export function useCalendar(filters: CalendarFilters = {}) {
+  const params = new URLSearchParams();
+  if (filters.from) params.set('from', filters.from);
+  if (filters.to) params.set('to', filters.to);
+  if (filters.impact) params.set('impact', filters.impact);
+  if (filters.instrument) params.set('instrument', filters.instrument);
+  if (filters.limit) params.set('limit', String(filters.limit));
+  const query = params.toString();
+  return useApi<CalendarResponse>(`/api/v1/calendar${query ? `?${query}` : ''}`, {
+    refreshInterval: 300_000,
+  });
 }

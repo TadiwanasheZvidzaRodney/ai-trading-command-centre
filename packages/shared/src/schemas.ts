@@ -98,12 +98,13 @@ export const newsItemSchema = z.object({
   fetchedAt: isoDateSchema,
   currencies: z.array(z.string().max(3)).max(10),
   instruments: z.array(instrumentSymbolSchema).max(3),
-  relevance: z.number().min(0).max(1),
+  relevance: z.number().min(0).max(100),
   tags: z.array(z.string().max(80)).max(20),
 });
 
 export const calendarEventSchema = z.object({
   id: z.string().min(1),
+  externalId: z.string().min(1).max(200),
   title: z.string().min(1).max(500),
   currency: z.string().min(1).max(8),
   country: z.string().min(1).max(80),
@@ -138,6 +139,7 @@ export const calendarQuerySchema = z.object({
   from: isoDateSchema.optional(),
   to: isoDateSchema.optional(),
   impact: impactSchema.optional(),
+  instrument: instrumentSymbolSchema.optional(),
   limit: z.coerce.number().int().min(1).max(500).default(100),
 });
 

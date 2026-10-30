@@ -2,12 +2,14 @@
 
 import {
   AlertTriangle,
+  CalendarDays,
   CheckCircle2,
   Circle,
   Clock,
   Database,
   Gauge,
   LineChart,
+  Newspaper,
   Server,
   ShieldCheck,
 } from 'lucide-react';
@@ -68,7 +70,7 @@ export default function OverviewPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 3 · Trading workspace</span>
+          <span className="pill accent">Phase 4 · News and macro intelligence</span>
           <h2>Research first. Risk before reward.</h2>
           <p>
             A personal workspace for XAU/USD, EUR/USD and GBP/USD. Real data, deterministic
@@ -230,7 +232,7 @@ export default function OverviewPage() {
         <section className="card">
           <div className="card-header">
             <h3 className="card-title">Foundation checklist</h3>
-            <span className="badge ok">Phase 3</span>
+            <span className="badge ok">Phase 4</span>
           </div>
           <div className="card-body">
             <ul className="checklist">
@@ -258,9 +260,13 @@ export default function OverviewPage() {
                 <CheckCircle2 size={15} />
                 <span>Trading workspace with watchlist, candlestick charts, snapshot, tasks and calendar (Phase 3).</span>
               </li>
+              <li className="done">
+                <CheckCircle2 size={15} />
+                <span>RSS news and UTC economic calendar ingestion with source status and high-impact highlighting (Phase 4).</span>
+              </li>
               <li className="pending">
                 <Circle size={15} />
-                <span>News, calendar ingestion, analysis, risk, paper trading and backtesting.</span>
+                <span>Technical analysis, AI copilot, risk, paper trading and backtesting.</span>
               </li>
             </ul>
           </div>
@@ -270,6 +276,12 @@ export default function OverviewPage() {
             </Link>
             <Link href="/tasks" className="btn btn-sm">
               <CheckCircle2 size={13} /> Tasks
+            </Link>
+            <Link href="/news" className="btn btn-sm">
+              <Newspaper size={13} /> News
+            </Link>
+            <Link href="/calendar" className="btn btn-sm">
+              <CalendarDays size={13} /> Calendar
             </Link>
             <Link href="/settings" className="btn btn-sm">
               <Server size={13} /> View system configuration
@@ -325,16 +337,16 @@ export default function OverviewPage() {
         <section className="card">
           <div className="card-header">
             <h3 className="card-title">Next milestone</h3>
-            <span className="badge accent">Phase 4</span>
+            <span className="badge accent">Phase 5</span>
           </div>
           <div className="card-body stack small muted">
             <p>
-              Ingest public RSS news and the economic calendar with source attribution,
-              relevance tagging and UTC-normalised event times.
+              Add deterministic technical analysis: SMA, EMA, RSI, MACD, ATR, ADX,
+              Bollinger bands, stochastic, structure and strategy candidates.
             </p>
             <p className="hint">
-              Until ingestion is live, the News and Calendar pages show no events rather
-              than placeholder data.
+              News and the economic calendar are now live, source-linked and UTC-normalised.
+              Their relevance and impact labels are calculations, not predictions.
             </p>
           </div>
         </section>

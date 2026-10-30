@@ -5,7 +5,9 @@ import rateLimit from '@fastify/rate-limit';
 import swagger from '@fastify/swagger';
 import swaggerUi from '@fastify/swagger-ui';
 import type { Env } from '@atc/config';
+import { CalendarService } from '@atc/economic-calendar';
 import { MarketDataError, MarketDataService } from '@atc/market-data';
+import { NewsService } from '@atc/news';
 import Fastify, {
   type FastifyInstance,
   type FastifyServerOptions,
@@ -17,6 +19,11 @@ import { registerAuthRoutes } from './auth/routes.js';
 import type { DatabaseLike } from './db/mongo.js';
 import { AppError, zodDetails } from './errors.js';
 import { registerHealthRoutes } from './health/routes.js';
+import {
+  MongoCalendarStore,
+  MongoNewsStore,
+} from './intelligence/repository.js';
+import { registerIntelligenceRoutes } from './intelligence/routes.js';
 import { loggerOptions } from './logger.js';
 import { MongoMarketDataStore } from './market/repository.js';
 import { registerMarketRoutes } from './market/routes.js';
@@ -105,6 +112,8 @@ export interface BuildServerOptions {
   logger?: FastifyServerOptions['logger'];
   marketData?: MarketDataService;
   taskStore?: TaskStore;
+  news?: NewsService;
+  calendar?: CalendarService;
 }
 
 export async function buildServer(options: BuildServerOptions): Promise<FastifyInstance> {
@@ -134,6 +143,29 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
       },
     });
   const taskStore = options.taskStore ?? new MongoTaskStore(db.db);
+  const news =
+    options.news ??
+    new NewsService({
+      env: {
+        NEWS_RSS_FEEDS: env.NEWS_RSS_FEEDS,
+        NEWS_POLL_MINUTES: env.NEWS_POLL_MINUTES,
+      },
+      store: new MongoNewsStore(db.db),
+      logger: {
+        warn: (context, message) => app.log.warn(context, message),
+        error: (context, message) => app.log.error(context, message),
+      },
+    });
+  const calendar =
+    options.calendar ??
+    new CalendarService({
+      env: { CALENDAR_POLL_MINUTES: env.CALENDAR_POLL_MINUTES },
+      store: new MongoCalendarStore(db.db),
+      logger: {
+        warn: (context, message) => app.log.warn(context, message),
+        error: (context, message) => app.log.error(context, message),
+      },
+    });
 
   await app.register(cookie, { secret: env.SESSION_SECRET });
 
@@ -175,10 +207,11 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   }
 
   await registerAuth(app, { env, db });
-  await registerHealthRoutes(app, { env, db, marketData });
+  await registerHealthRoutes(app, { env, db, marketData, news, calendar });
   await registerAuthRoutes(app, { env, db });
   await registerMarketRoutes(app, { marketData });
   await registerTaskRoutes(app, { store: taskStore });
+  await registerIntelligenceRoutes(app, { news, calendar });
   await registerSystemRoutes(app, { env });
 
   app.get('/', async () => ({
@@ -188,6 +221,8 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
     health: '/health',
     docs: env.NODE_ENV !== 'production' ? '/docs' : null,
     marketData: '/api/v1/market/quotes',
+    news: '/api/v1/news',
+    calendar: '/api/v1/calendar',
     liveTradingEnabled: false,
   }));
 

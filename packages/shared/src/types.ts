@@ -147,8 +147,31 @@ export interface NewsItem {
   tags: string[];
 }
 
+export interface NewsSourceStatus {
+  id: string;
+  url: string;
+  status: 'ok' | 'error';
+  itemCount: number;
+  skippedCount: number;
+  latencyMs: number;
+  error: string | null;
+}
+
+export interface NewsFeed {
+  items: NewsItem[];
+  provider: ProviderInfo;
+  sources: NewsSourceStatus[];
+  fetchedAt: string;
+  cached: boolean;
+  duplicatesRemoved: number;
+  skippedCount: number;
+  error: string | null;
+  notes: string[];
+}
+
 export interface CalendarEvent {
   id: string;
+  externalId: string;
   title: string;
   currency: string;
   country: string;
@@ -162,6 +185,18 @@ export interface CalendarEvent {
   fetchedAt: string;
   instruments: InstrumentSymbol[];
   note?: string;
+}
+
+export interface CalendarFeed {
+  events: CalendarEvent[];
+  provider: ProviderInfo;
+  weekStart: string;
+  weekEnd: string;
+  fetchedAt: string;
+  cached: boolean;
+  skippedCount: number;
+  error: string | null;
+  notes: string[];
 }
 
 export interface IndicatorPoint {

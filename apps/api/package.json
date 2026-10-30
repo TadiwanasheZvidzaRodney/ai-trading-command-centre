@@ -12,7 +12,9 @@
   },
   "dependencies": {
     "@atc/config": "*",
+    "@atc/economic-calendar": "*",
     "@atc/market-data": "*",
+    "@atc/news": "*",
     "@atc/shared": "*",
     "@fastify/cookie": "^11.1.5",
     "@fastify/cors": "^11.3.1",

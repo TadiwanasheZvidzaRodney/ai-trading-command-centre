@@ -145,16 +145,47 @@ timeframes, read provenance warnings, and manage tasks without console errors.
 
 ## Phase 4 - News and macro intelligence
 
-- [ ] RSS ingestion with dedupe and source attribution.
-- [ ] Relevance tagging for USD/EUR/GBP/XAU.
-- [ ] Economic calendar ingestion and UTC normalisation.
-- [ ] Upcoming high-impact event highlighting.
-- [ ] News/calendar API routes and UI.
-- [ ] Ingestion failure monitoring.
+- [x] RSS ingestion with dedupe and source attribution.
+- [x] Relevance tagging for USD/EUR/GBP/XAU.
+- [x] Economic calendar ingestion and UTC normalisation.
+- [x] Upcoming high-impact event highlighting.
+- [x] News/calendar API routes and UI.
+- [x] Ingestion failure monitoring.
 
 **Acceptance criteria:** source-linked items appear with timestamps; duplicates are
 suppressed; timezone conversion is correct across DST; the current-week limitation is
 stated.
+
+**Verified 2026-10-30:**
+- `npm run lint` — clean, 0 errors and 0 warnings.
+- `npm run typecheck` — API, web, config, market-data, news, economic-calendar and
+  shared workspaces pass.
+- `npm test` — 23 files, 130 tests passed, including RSS/Atom parsing, relevance
+  tagging, calendar normalisation, DST offset handling, and news/calendar route auth
+  and validation.
+- `npm run build` — API ESM bundle 199.64 KB; Next.js production build completed with
+  14 static routes including `/news` and `/calendar`.
+- Live API smoke against `http://127.0.0.1:4000`: `/api/v1/news` returned 50 of 169
+  unique items from 6/6 feeds, removed 3 duplicates and exposed per-source latency,
+  item counts and errors. `/api/v1/calendar` returned 59 USD/EUR/GBP events for the
+  Sunday-start UTC week 25 Oct - 01 Nov 2026, 9 high-impact, with 38 unsupported rows
+  skipped. `/health/providers` reported both providers as `ok` after a live fetch.
+- Browser at `http://localhost:3000/news`: 45 tagged headlines from 100 fetched,
+  source-linked titles, published and fetched UTC timestamps, relevance and instrument
+  filters, per-feed status table, provider health and a working refresh; no console
+  errors.
+- Browser at `http://localhost:3000/calendar`: 59 events in a Sunday-start UTC grid,
+  9 high-impact events highlighted, forecast/previous values, provider health and a
+  working refresh; no console errors.
+- Relevance tagging was tightened after a live check: generic macro words no longer
+  tag unrelated countries (a Malaysia policy-rate story scores 0), while explicit
+  `US`/`EUR`/`GBP`/gold context still tags the supported instruments. Relevance is a
+  keyword calculation, not sentiment or a prediction.
+- **Limitations:** Forex Factory is an unofficial community mirror that publishes the
+  current week only and no actual values. RSS items contain headlines, links and
+  published times only; article bodies are not stored. Feed availability and item
+  counts vary by provider. Neither source is trading-grade and both must be verified
+  against primary sources.
 
 ## Phase 5 - Technical analysis
 
