@@ -9,6 +9,7 @@ import {
   parseDeploymentFile,
   validateDeploymentValues,
 } from './deploy.js';
+import { replaceEnvValue } from './hash-password.js';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const template = readFileSync(path.join(root, '.env.deploy.example'), 'utf8');
@@ -103,5 +104,16 @@ describe('deployment configuration', () => {
         NEXT_PUBLIC_API_URL: 'https://your-api.onrender.com',
       }),
     ).toThrow(/NEXT_PUBLIC_API_URL/);
+  });
+
+  it('updates the password hash line without changing other env entries', () => {
+    const contents = 'AUTH_MODE=session\r\nAUTH_PASSWORD_HASH=old-value\r\nMONGODB_DB=atc\r\n';
+    const hash = `$2b$12$${'a'.repeat(53)}`;
+    expect(replaceEnvValue(contents, 'AUTH_PASSWORD_HASH', 'new-hash')).toBe(
+      'AUTH_MODE=session\r\nAUTH_PASSWORD_HASH=new-hash\r\nMONGODB_DB=atc\r\n',
+    );
+    expect(replaceEnvValue(contents, 'AUTH_PASSWORD_HASH', hash)).toBe(
+      `AUTH_MODE=session\r\nAUTH_PASSWORD_HASH=${hash}\r\nMONGODB_DB=atc\r\n`,
+    );
   });
 });

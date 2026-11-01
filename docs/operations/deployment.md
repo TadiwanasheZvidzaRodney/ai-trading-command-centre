@@ -159,6 +159,7 @@ npm run deploy -- link-web
 npm run deploy -- doctor
 npm run deploy -- build
 npm run deploy -- sync-env --dry-run
+npm run deploy -- sync-render --dry-run
 npm run deploy -- deploy-api --dry-run
 npm run deploy -- deploy-web --dry-run
 npm run deploy -- deploy-all
@@ -168,8 +169,9 @@ npm run deploy -- verify
 `link-web` creates the ignored `.vercel/project.json` from the local IDs. `sync-env`
 uses provider APIs over HTTPS: it upserts only `NEXT_PUBLIC_API_URL` on Vercel and
 merges the managed variables with Render's current service variables before one bulk
-update. The bulk update preserves unrelated variables and does not itself deploy;
-`deploy-api` triggers one Render deploy afterward. Deploy commands are explicit and
+update. `sync-render` performs only the Render part and never sends the Vercel token.
+The bulk update preserves unrelated variables and does not itself deploy; `deploy-api`
+triggers one Render deploy afterward. Deploy commands are explicit and
 require a clean worktree; Render deployment additionally requires the current commit to
 be pushed to its upstream branch. The CLI never prints secret values. `doctor` reports
 variable names and readiness only.

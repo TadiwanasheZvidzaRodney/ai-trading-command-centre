@@ -9,5 +9,5 @@ export default defineConfig({
   sourcemap: true,
   dts: false,
   noExternal: [/^@atc\//],
-  external: ['pino-pretty'],
+  external: ['dotenv', 'pino-pretty'],
 });

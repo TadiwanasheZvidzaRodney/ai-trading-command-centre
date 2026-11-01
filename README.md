@@ -10,8 +10,8 @@ trade planning, risk controls, paper trading, journaling and backtesting in one 
 
 **Current status:** Phase 0 (architecture and provider decisions), Phase 1
 (foundation), Phase 2 (real market data), Phase 3 (trading workspace), Phase 4
-(news and macro intelligence) and Phase 5 framework (technical analysis) are implemented. 
-Feature phases are being built incrementally. See [`docs/implementation-plan.md`](docs/implementation-plan.md) 
+(news and macro intelligence) and Phase 5 framework (technical analysis) are implemented.
+Feature phases are being built incrementally. See [`docs/implementation-plan.md`](docs/implementation-plan.md)
 for the live status and acceptance evidence.
 
 ## Principles
@@ -81,8 +81,9 @@ For local development the template uses `AUTH_MODE=disabled`, which shows a visi
 warning in the UI. To use the login flow instead:
 
 ```bash
-npm run auth:hash -- "your-password"
-# put the printed hash in AUTH_PASSWORD_HASH, set AUTH_USERNAME and AUTH_MODE=session
+npm run auth:hash -- --deploy-file
+# enter the password in the terminal prompt; the hash is written to ignored .env.deploy.local
+# set AUTH_USERNAME in .env.deploy.local and keep AUTH_MODE=session for production
 ```
 
 ### 2. Start MongoDB

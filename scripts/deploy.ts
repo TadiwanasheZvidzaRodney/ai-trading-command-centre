@@ -216,6 +216,7 @@ Commands:
   doctor               Validate local configuration without showing values
   build                Run the production workspace build
   sync-env             Sync production variables to Vercel and Render
+  sync-render          Sync production runtime variables to Render only
   configure-api        Configure the existing Render service for this monorepo
   deploy-api           Configure, sync and deploy the pushed Render commit
   deploy-web           Sync the public URL and deploy with the Vercel CLI
@@ -577,6 +578,7 @@ async function main(args: string[]): Promise<void> {
     await syncRender(values, dryRun);
     return;
   }
+  if (command === 'sync-render') return syncRender(values, dryRun);
   if (command === 'configure-api') return configureRender(values, dryRun);
   if (command === 'deploy-api') {
     if (dryRun) {
