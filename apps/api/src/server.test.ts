@@ -78,6 +78,22 @@ describe('API foundation', () => {
     expect(body.csrfToken).toBeTruthy();
   });
 
+  it('sets secure cross-site CSRF cookies in production', async () => {
+    const app = await makeServer({
+      NODE_ENV: 'production',
+      AUTH_MODE: 'session',
+      AUTH_USERNAME: 'owner',
+      AUTH_PASSWORD_HASH: bcryptLikeHash,
+      SESSION_SECRET: 'production-session-secret-with-more-than-32-characters',
+      API_URL: 'https://atc-api.onrender.com',
+      WEB_URL: 'https://atc-web.vercel.app',
+    });
+    const response = await app.inject({ method: 'GET', url: '/api/v1/auth/status' });
+    expect(response.statusCode).toBe(200);
+    expect(response.headers['set-cookie']).toContain('SameSite=None');
+    expect(response.headers['set-cookie']).toContain('Secure');
+  });
+
   it('returns a structured 404', async () => {
     const app = await makeServer();
     const response = await app.inject({ method: 'GET', url: '/does-not-exist' });

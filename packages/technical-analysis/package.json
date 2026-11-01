@@ -37,7 +37,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@atc/shared": "workspace:*"
+    "@atc/shared": "*"
   },
   "devDependencies": {
     "typescript": "^5.9.3",

@@ -5,16 +5,5 @@
   },
   "buildCommand": "npm run build -w @atc/web",
   "outputDirectory": "apps/web/.next",
-  "installCommand": "npm install",
-  "env": [
-    {
-      "key": "NEXT_PUBLIC_API_URL",
-      "description": "Backend API URL (set in Vercel dashboard)",
-      "value": ""
-    },
-    {
-      "key": "NODE_ENV",
-      "value": "production"
-    }
-  ]
+  "installCommand": "npm ci"
 }

@@ -42,7 +42,7 @@ Recommended free-tier starting point:
 - **Secrets:** hosting provider's secret manager; never commit `.env`.
 
 If the web and API are on different origins, set `WEB_URL` to the exact web origin and
-`NEXT_PUBLIC_API_URL` to the API origin. CORS is restricted to `WEB_URL`.
+`NEXT_PUBLIC_API_URL`/`API_URL` to the API origin. CORS is restricted to `WEB_URL`.
 
 ## 3. Environment rules
 
@@ -118,3 +118,69 @@ Minimum procedure:
 - Do not roll back the database schema blindly; migrations/index changes must be
   backward compatible or have a documented reverse plan.
 - Record the incident and the rollback reason.
+
+## 10. Vercel + Render + MongoDB Atlas CLI workflow
+
+The supported personal deployment topology is a Next.js web app on Vercel, a Fastify
+API on Render, and MongoDB Atlas. Create the Vercel project, Render web service, and
+Atlas cluster/database user once in their provider control planes. The deployment CLI
+targets those existing resources; it does not create clusters, users, or network rules.
+
+The repository root is the build root for both services because npm workspaces and the
+lockfile live there. Set the Vercel project's Root Directory to the repository root.
+The CLI configures the Render service root to `.` with build command
+`npm ci && npm run build -w @atc/api`, start command `npm run start:api`, and readiness
+path `/health/ready`. Render supplies `PORT`; the API validates and listens on it.
+
+Initialize the private deployment file, then populate it locally:
+
+```powershell
+npm run deploy -- init
+```
+
+Install the Vercel CLI once with `npm install --global vercel`. Generate a unique session
+secret locally with `node -e "console.log(require('node:crypto').randomBytes(48).toString('base64url'))"`.
+Set `AUTH_USERNAME` and a bcrypt `AUTH_PASSWORD_HASH`; never use `AUTH_MODE=disabled`
+in production.
+
+Edit `.env.deploy.local` with the Vercel token, team/project IDs, Render API key/service
+ID, production URLs, Atlas connection string, authentication values, and any selected
+market-data/AI provider keys. This file is ignored by Git. Never paste its values into
+chat, commit it, or print it in a terminal transcript. A MongoDB Atlas API key is not
+needed to deploy to an existing cluster; `MONGODB_URI` is the application's database
+credential. Git-ignore is not encryption; keep the file under your protected Windows
+user profile and use device encryption. Atlas cluster creation and network access remain
+manual/provider-managed.
+
+The CLI commands are:
+
+```powershell
+npm run deploy -- link-web
+npm run deploy -- doctor
+npm run deploy -- build
+npm run deploy -- sync-env --dry-run
+npm run deploy -- deploy-api --dry-run
+npm run deploy -- deploy-web --dry-run
+npm run deploy -- deploy-all
+npm run deploy -- verify
+```
+
+`link-web` creates the ignored `.vercel/project.json` from the local IDs. `sync-env`
+uses provider APIs over HTTPS: it upserts only `NEXT_PUBLIC_API_URL` on Vercel and
+merges the managed variables with Render's current service variables before one bulk
+update. The bulk update preserves unrelated variables and does not itself deploy;
+`deploy-api` triggers one Render deploy afterward. Deploy commands are explicit and
+require a clean worktree; Render deployment additionally requires the current commit to
+be pushed to its upstream branch. The CLI never prints secret values. `doctor` reports
+variable names and readiness only.
+
+Set `WEB_URL` to the exact Vercel origin and `API_URL`/`NEXT_PUBLIC_API_URL` to the
+Render origin. Production cookies are `Secure; SameSite=None` for cross-site browser
+requests, with exact-origin CORS and CSRF token validation. Related custom domains such
+as `app.example.com` and `api.example.com` are preferable; browser third-party-cookie
+settings can still restrict unrelated `vercel.app` and `onrender.com` sites.
+
+The Render API deploy endpoint builds a commit already available in the connected Git
+repository; it does not upload uncommitted local code. Free Render services may sleep,
+so in-process quote/news/calendar schedulers are not a reliable always-on ingestion
+worker. Keep live trading disabled.

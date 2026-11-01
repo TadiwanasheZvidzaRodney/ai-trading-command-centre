@@ -16,6 +16,9 @@ test-results/
 .env
 .env.*
 !.env.example
+!.env.deploy.example
+.env.deploy.local
+/.vercel/
 *.pem
 *.key
 

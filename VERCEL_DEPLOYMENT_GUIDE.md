@@ -1,9 +1,13 @@
 # 🚀 Vercel Deployment Guide - AI Trading Command Centre
 
+> Superseded for this repository's current Vercel + Render + MongoDB Atlas setup. This
+> older guide includes unsafe or stale settings. Use [docs/operations/deployment.md](docs/operations/deployment.md)
+> and the `npm run deploy` CLI instead.
+
 **Date:** October 30, 2026  
 **Deployment Type:** Frontend-only (Recommended)  
 **Frontend:** Next.js on Vercel  
-**Backend:** Render/Railway/Fly.io (separate)  
+**Backend:** Render/Railway/Fly.io (separate)
 
 ---
 
@@ -75,6 +79,7 @@
 ## ✅ Step 1: Prepare Your Repository
 
 ### Current Status
+
 ```
 ✅ Next.js app ready              apps/web/
 ✅ Fastify API ready              apps/api/
@@ -85,6 +90,7 @@
 ```
 
 ### Verify Build Works Locally
+
 ```bash
 npm run build
 # Output should show:
@@ -98,6 +104,7 @@ npm run build
 ## ✅ Step 2: Set Up MongoDB Atlas (Free Tier)
 
 ### 1. Create Account
+
 ```
 1. Go to https://www.mongodb.com/cloud/atlas
 2. Click "Try Free"
@@ -106,6 +113,7 @@ npm run build
 ```
 
 ### 2. Create Cluster
+
 ```
 1. Create cluster → Free Tier (Shared)
 2. Choose region (closest to you)
@@ -115,6 +123,7 @@ npm run build
 ```
 
 ### 3. Create Database User
+
 ```
 1. Security → Database Access
 2. Add Database User
@@ -127,6 +136,7 @@ Store credentials safely! You'll need them in Step 4.
 ```
 
 ### 4. Whitelist IP (or allow all for development)
+
 ```
 1. Security → Network Access
 2. Add IP Address
@@ -138,6 +148,7 @@ Store credentials safely! You'll need them in Step 4.
 ```
 
 ### 5. Get Connection String
+
 ```
 1. Databases → Connect
 2. Choose: Drivers
@@ -155,6 +166,7 @@ Replace PASSWORD with the one you created in Step 3.
 ## ✅ Step 3: Deploy Backend to Render (Free Tier)
 
 ### 1. Create Render Account
+
 ```
 1. Go to https://render.com
 2. Sign up with GitHub
@@ -162,6 +174,7 @@ Replace PASSWORD with the one you created in Step 3.
 ```
 
 ### 2. Create New Web Service
+
 ```
 1. Dashboard → New → Web Service
 2. Select your GitHub repository
@@ -177,6 +190,7 @@ Replace PASSWORD with the one you created in Step 3.
 ```
 
 ### 3. Add Environment Variables
+
 ```
 In Render Dashboard → atc-api → Environment:
 
@@ -200,6 +214,7 @@ Details on each below.
 ```
 
 ### 4. Get Backend URL
+
 ```
 After deployment, you'll see:
   https://atc-api-xxxxx.onrender.com
@@ -212,6 +227,7 @@ This is your backend URL. Save it for Step 5.
 ## ✅ Step 4: Deploy Frontend to Vercel
 
 ### 1. Create Vercel Account (Free)
+
 ```
 1. Go to https://vercel.com
 2. Sign up with GitHub
@@ -219,6 +235,7 @@ This is your backend URL. Save it for Step 5.
 ```
 
 ### 2. Import Project
+
 ```
 1. Dashboard → Add New → Project
 2. Select: ai-trading-command-centre repository
@@ -232,6 +249,7 @@ This is your backend URL. Save it for Step 5.
 ```
 
 ### 3. Add Environment Variables
+
 ```
 In Vercel Dashboard → Settings → Environment Variables:
 
@@ -245,6 +263,7 @@ It MUST be set before deployment, or frontend won't know where backend is.
 ```
 
 ### 4. Trigger Redeploy (Important!)
+
 ```
 After setting NEXT_PUBLIC_API_URL:
 1. Go to Deployments
@@ -256,6 +275,7 @@ This rebuilds with the correct API URL embedded.
 ```
 
 ### 5. Get Frontend URL
+
 ```
 After deployment, you'll see:
   https://atc-web.vercel.app  (or custom domain)
@@ -268,12 +288,14 @@ This is your frontend URL. Users go here.
 ## 🔧 Environment Variables Summary
 
 ### Frontend (Vercel)
+
 ```
 NEXT_PUBLIC_API_URL=https://atc-api-xxxxx.onrender.com
 NODE_ENV=production
 ```
 
 ### Backend (Render)
+
 ```
 # Database
 MONGODB_URI=mongodb+srv://atc_user:PASSWORD@cluster.mongodb.net/atc?retryWrites=true&w=majority
@@ -329,6 +351,7 @@ LOG_LEVEL=info
 ## 🧪 Testing Deployment
 
 ### 1. Check Frontend
+
 ```
 1. Open: https://atc-web.vercel.app
 2. Should see dashboard load
@@ -344,6 +367,7 @@ LOG_LEVEL=info
 ```
 
 ### 2. Check Backend
+
 ```bash
 # Test health endpoint
 curl https://atc-api-xxxxx.onrender.com/health
@@ -361,6 +385,7 @@ curl -X POST https://atc-api-xxxxx.onrender.com/api/v1/copilot/analyze \
 ```
 
 ### 3. Check API Integration
+
 ```
 1. Open dashboard: https://atc-web.vercel.app
 2. Go to /markets
@@ -377,6 +402,7 @@ curl -X POST https://atc-api-xxxxx.onrender.com/api/v1/copilot/analyze \
 ## 📊 Free Tier Limits
 
 ### Vercel Frontend
+
 ```
 ✅ Bandwidth:        100 GB/month (enough for most users)
 ✅ Deployments:      Unlimited
@@ -386,6 +412,7 @@ curl -X POST https://atc-api-xxxxx.onrender.com/api/v1/copilot/analyze \
 ```
 
 ### Render Backend
+
 ```
 ✅ Memory:           512 MB (shared)
 ✅ Uptime:           99.9% SLA (only if paid - free gets ~50% auto-pause)
@@ -395,6 +422,7 @@ curl -X POST https://atc-api-xxxxx.onrender.com/api/v1/copilot/analyze \
 ```
 
 ### MongoDB Atlas
+
 ```
 ✅ Storage:          512 MB (free tier)
 ✅ Connections:      Limited concurrent connections
@@ -407,15 +435,17 @@ curl -X POST https://atc-api-xxxxx.onrender.com/api/v1/copilot/analyze \
 ## ⚠️ Known Limitations (Free Tier)
 
 ### 1. Render Auto-Pause
+
 ```
 Issue: API goes to sleep after 15 minutes of no traffic
 Effect: First request takes ~30 seconds (cold start)
-Solution: 
+Solution:
   - Keep-alive ping from frontend (every 5 minutes)
   - Or upgrade to paid Render plan (~$7/month)
 ```
 
 ### 2. MongoDB Connection Limits
+
 ```
 Issue: Free tier limits concurrent connections
 Effect: Under heavy load, may see connection errors
@@ -425,6 +455,7 @@ Solution:
 ```
 
 ### 3. Vercel Function Timeout
+
 ```
 Issue: Free tier has no serverless function timeout limit (uses Node.js)
 Effect: Long-running AI analysis calls work fine
@@ -474,8 +505,10 @@ Solution: Already handled in code (15 second timeout per call)
 ## 🆘 Troubleshooting
 
 ### Frontend Won't Connect to Backend
+
 **Symptom:** Dashboard loads but data doesn't show, console shows network errors  
 **Fix:**
+
 ```
 1. Check Render backend is deployed: https://atc-api-xxxxx.onrender.com/health
 2. Verify NEXT_PUBLIC_API_URL is set correctly in Vercel
@@ -484,8 +517,10 @@ Solution: Already handled in code (15 second timeout per call)
 ```
 
 ### API Returns 503 Service Unavailable
+
 **Symptom:** API endpoint returns 503  
 **Fix:**
+
 ```
 1. Render free tier auto-pauses - wait 30 seconds for cold start
 2. Check Render logs: go to Render dashboard → Logs tab
@@ -494,8 +529,10 @@ Solution: Already handled in code (15 second timeout per call)
 ```
 
 ### Analysis Takes Very Long
+
 **Symptom:** /copilot analysis takes >15 seconds  
 **Fix:**
+
 ```
 1. AI analysis times out after 15 seconds (by design, in .env)
 2. This is normal - falls back to facts-only report
@@ -503,8 +540,10 @@ Solution: Already handled in code (15 second timeout per call)
 ```
 
 ### Cold Start Issues
+
 **Symptom:** First request to API takes 30+ seconds  
 **Fix:**
+
 ```
 1. This is normal on Render free tier (auto-pause)
 2. To reduce: set up keep-alive pings from frontend
@@ -516,6 +555,7 @@ Solution: Already handled in code (15 second timeout per call)
 ## 📈 Monitoring & Logging
 
 ### Vercel Dashboard
+
 ```
 1. Go to https://vercel.com/dashboard
 2. Select project → Deployments
@@ -525,6 +565,7 @@ Solution: Already handled in code (15 second timeout per call)
 ```
 
 ### Render Dashboard
+
 ```
 1. Go to https://dashboard.render.com
 2. Select atc-api service
@@ -534,6 +575,7 @@ Solution: Already handled in code (15 second timeout per call)
 ```
 
 ### MongoDB Atlas
+
 ```
 1. Go to https://cloud.mongodb.com
 2. Select cluster
@@ -547,6 +589,7 @@ Solution: Already handled in code (15 second timeout per call)
 ## 🔐 Security Notes
 
 ### Current Setup (Development)
+
 ```
 ⚠️  Auth disabled (AUTH_MODE=disabled)
 ⚠️  No session validation
@@ -556,6 +599,7 @@ Solution: Already handled in code (15 second timeout per call)
 ```
 
 ### For Production
+
 ```
 1. Enable authentication (AUTH_MODE=session)
 2. Set strong SESSION_SECRET (32+ chars, random)
@@ -571,6 +615,7 @@ Solution: Already handled in code (15 second timeout per call)
 ## 💰 Cost Estimates
 
 ### Monthly Cost (Free Tier)
+
 ```
 Vercel Frontend:       $0 (free tier)
 Render Backend:        $0 (free tier, with auto-pause)
@@ -580,6 +625,7 @@ TOTAL (Free):          $0/month
 ```
 
 ### Monthly Cost (Recommended Production)
+
 ```
 Vercel Pro:            $20 (or standard $0 + add-ons)
 Render Starter:        $7 (no auto-pause, 2 GB memory)
@@ -603,17 +649,20 @@ TOTAL (Production):    ~$7-30/month
 ## ✅ What's Next?
 
 ### Immediately After Deployment
+
 1. Test all pages load
 2. Generate AI analysis on /copilot
 3. Share URL with team
 4. Monitor logs for issues
 
 ### Next 24 Hours
+
 1. Set up basic monitoring alerts
 2. Check cold start performance
 3. Decide on paid upgrades if needed
 
 ### Next Week
+
 1. Enable authentication (if needed)
 2. Set up backup strategy
 3. Plan Phase 7 (Risk & Paper Trading)
@@ -622,6 +671,6 @@ TOTAL (Production):    ~$7-30/month
 
 **Deployment Guide Created:** October 30, 2026  
 **Status:** Ready to Deploy  
-**Estimated Time:** 20-30 minutes total  
+**Estimated Time:** 20-30 minutes total
 
 Next step: Follow Step 2 (MongoDB Atlas setup)!

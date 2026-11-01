@@ -30,10 +30,7 @@ const booleanString = (defaultValue: 'true' | 'false') =>
     .transform((value) => value.toLowerCase() === 'true' || value === '1');
 
 const urlString = (label: string) =>
-  z
-    .string()
-    .min(1)
-    .refine(isValidUrl, `${label} must be an http(s) URL`);
+  z.string().min(1).refine(isValidUrl, `${label} must be an http(s) URL`);
 
 const feedList = z
   .string()
@@ -55,6 +52,7 @@ export const envSchema = z
 
     API_HOST: z.string().min(1).default('0.0.0.0'),
     API_PORT: z.coerce.number().int().min(1).max(65_535).default(4000),
+    PORT: z.coerce.number().int().min(1).max(65_535).optional(),
     API_URL: urlString('API_URL').default('http://localhost:4000'),
     WEB_URL: urlString('WEB_URL').default('http://localhost:3000'),
 
@@ -71,7 +69,12 @@ export const envSchema = z
     AUTH_USERNAME: z.string().max(64).optional(),
     AUTH_PASSWORD_HASH: z.string().max(200).optional(),
     SESSION_SECRET: z.string().min(32, 'SESSION_SECRET must be at least 32 characters'),
-    SESSION_TTL_HOURS: z.coerce.number().int().min(1).max(24 * 30).default(168),
+    SESSION_TTL_HOURS: z.coerce
+      .number()
+      .int()
+      .min(1)
+      .max(24 * 30)
+      .default(168),
 
     DEFAULT_TIMEZONE: z
       .string()
@@ -160,7 +163,10 @@ export const envSchema = z
       }
     }
 
-    if (env.MARKET_DATA_QUOTE_PROVIDER === 'twelvedata' || env.MARKET_DATA_CANDLE_PROVIDER === 'twelvedata') {
+    if (
+      env.MARKET_DATA_QUOTE_PROVIDER === 'twelvedata' ||
+      env.MARKET_DATA_CANDLE_PROVIDER === 'twelvedata'
+    ) {
       if (!env.MARKET_DATA_TWELVE_DATA_API_KEY) {
         ctx.addIssue({
           code: 'custom',
@@ -243,6 +249,10 @@ export function createEnv(input: Record<string, string | undefined>): Env {
     throw new Error(`Invalid environment configuration:\n${details}`);
   }
   return parsed.data;
+}
+
+export function parseEnvText(contents: string): Record<string, string> {
+  return dotenv.parse(contents);
 }
 
 let cached: Env | null = null;

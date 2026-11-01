@@ -13,8 +13,14 @@ describe('environment validation', () => {
   it('accepts a minimal test configuration', () => {
     const env = createEnv(base);
     expect(env.API_PORT).toBe(4000);
+    expect(env.PORT).toBeUndefined();
     expect(env.TRADING_MODE).toBe('research');
     expect(env.MARKET_DATA_QUOTE_PROVIDER).toBe('swissquote');
+  });
+
+  it('accepts the platform-provided port', () => {
+    expect(createEnv({ ...base, PORT: '10000' }).PORT).toBe(10000);
+    expect(() => createEnv({ ...base, PORT: '70000' })).toThrow(/PORT/);
   });
 
   it('parses RSS feeds into an array', () => {
@@ -22,10 +28,7 @@ describe('environment validation', () => {
       ...base,
       NEWS_RSS_FEEDS: 'https://example.com/a.xml, https://example.com/b.xml',
     });
-    expect(env.NEWS_RSS_FEEDS).toEqual([
-      'https://example.com/a.xml',
-      'https://example.com/b.xml',
-    ]);
+    expect(env.NEWS_RSS_FEEDS).toEqual(['https://example.com/a.xml', 'https://example.com/b.xml']);
   });
 
   it('rejects an invalid timezone', () => {
@@ -73,9 +76,9 @@ describe('environment validation', () => {
   });
 
   it('requires provider credentials when a keyed provider is selected', () => {
-    expect(() =>
-      createEnv({ ...base, MARKET_DATA_CANDLE_PROVIDER: 'twelvedata' }),
-    ).toThrow(/TWELVE_DATA/);
+    expect(() => createEnv({ ...base, MARKET_DATA_CANDLE_PROVIDER: 'twelvedata' })).toThrow(
+      /TWELVE_DATA/,
+    );
     expect(() => createEnv({ ...base, MARKET_DATA_QUOTE_PROVIDER: 'oanda' })).toThrow(/OANDA/);
   });
 

@@ -1,8 +1,11 @@
 # 🚀 Vercel Deployment - Quick Start (5-10 minutes per service)
 
+> Superseded. This checklist contains stale auth and Render configuration. Use
+> [docs/operations/deployment.md](docs/operations/deployment.md) and `npm run deploy`.
+
 **Status:** Ready to Deploy Right Now  
 **Complexity:** Easy (follow the checklist)  
-**Time Estimate:** 30-40 minutes total  
+**Time Estimate:** 30-40 minutes total
 
 ---
 
@@ -24,7 +27,7 @@ git status
 
 ---
 
-## STEP 1️⃣  MongoDB Atlas (5-10 min)
+## STEP 1️⃣ MongoDB Atlas (5-10 min)
 
 ### Go to: https://www.mongodb.com/cloud/atlas
 
@@ -47,7 +50,7 @@ git status
 
 ---
 
-## STEP 2️⃣  Render Backend (10-15 min)
+## STEP 2️⃣ Render Backend (10-15 min)
 
 ### Go to: https://render.com
 
@@ -78,7 +81,7 @@ git status
 
 ---
 
-## STEP 3️⃣  Vercel Frontend (10-15 min)
+## STEP 3️⃣ Vercel Frontend (10-15 min)
 
 ### Go to: https://vercel.com
 
@@ -108,12 +111,14 @@ git status
 ## ✅ TESTING (2-3 min)
 
 ### Test Backend
+
 ```bash
 curl https://atc-api-xxxxx.onrender.com/health
 # Should return: {"status":"ok",...}
 ```
 
 ### Test Frontend
+
 ```
 Open: https://atc-web.vercel.app
 Should see dashboard with 7 pages:
@@ -127,6 +132,7 @@ Should see dashboard with 7 pages:
 ```
 
 ### Test API Integration
+
 ```
 1. Go to /markets → Should show live quotes
 2. Go to /analysis → Should show chart + indicators
@@ -148,6 +154,7 @@ Database:  MongoDB Atlas (internal)
 ## ⚙️ Configuration Reference
 
 ### MongoDB Connection String Format
+
 ```
 mongodb+srv://USERNAME:PASSWORD@CLUSTER.mongodb.net/DATABASE?retryWrites=true&w=majority
 
@@ -156,6 +163,7 @@ mongodb+srv://atc_user:MyP@ssw0rd123@cluster0.abc123.mongodb.net/atc?retryWrites
 ```
 
 ### Environment Variables (Render Backend)
+
 ```
 MONGODB_URI             [from MongoDB Atlas]
 MONGODB_DB              atc
@@ -169,6 +177,7 @@ LOG_LEVEL               info
 ```
 
 ### Environment Variables (Vercel Frontend)
+
 ```
 NEXT_PUBLIC_API_URL     https://atc-api-xxxxx.onrender.com
 NODE_ENV                production
@@ -179,6 +188,7 @@ NODE_ENV                production
 ## ⚠️ Common Issues & Fixes
 
 ### "API not responding" or "503 error"
+
 ```
 → Render free tier auto-pauses after 15 min of inactivity
 → First request takes ~30 seconds to wake up
@@ -187,6 +197,7 @@ NODE_ENV                production
 ```
 
 ### "Frontend can't connect to backend"
+
 ```
 → Check NEXT_PUBLIC_API_URL is set correctly
 → Redeploy Vercel frontend after setting env var
@@ -195,6 +206,7 @@ NODE_ENV                production
 ```
 
 ### "MongoDB connection fails"
+
 ```
 → Check MONGODB_URI is copied correctly (no spaces)
 → Verify MongoDB user/password is correct
@@ -203,6 +215,7 @@ NODE_ENV                production
 ```
 
 ### "Cold start takes too long"
+
 ```
 → Normal on Render free tier (~30 seconds)
 → This is OK for development/testing
@@ -240,6 +253,7 @@ NODE_ENV                production
 Your AI Trading Command Centre is now deployed and live! 🎉
 
 **What you have:**
+
 - Live dashboard at Vercel
 - API running on Render
 - Database in MongoDB Atlas
@@ -248,6 +262,7 @@ Your AI Trading Command Centre is now deployed and live! 🎉
 - 40+ API endpoints accessible
 
 **Share with team:**
+
 ```
 Frontend: https://atc-web.vercel.app
 Docs: Check VERCEL_DEPLOYMENT_GUIDE.md for details
@@ -256,6 +271,7 @@ Docs: Check VERCEL_DEPLOYMENT_GUIDE.md for details
 ---
 
 **Next Steps:**
+
 1. Play around with the deployed version
 2. Test the /copilot page (AI Analysis)
 3. Monitor logs if anything breaks

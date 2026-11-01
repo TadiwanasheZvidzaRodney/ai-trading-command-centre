@@ -16,8 +16,8 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@atc/shared": "workspace:*",
-    "@atc/technical-analysis": "workspace:*",
+    "@atc/shared": "*",
+    "@atc/technical-analysis": "*",
     "pino": "^9.3.2",
     "zod": "^4.6.7"
   },

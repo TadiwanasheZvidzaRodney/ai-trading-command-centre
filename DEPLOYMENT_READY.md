@@ -1,10 +1,13 @@
 # 🚀 VERCEL DEPLOYMENT - READY TO LAUNCH
 
+> Superseded. This checklist contains stale auth, port, and database-network guidance.
+> Use [docs/operations/deployment.md](docs/operations/deployment.md) and `npm run deploy`.
+
 **Status:** ✅ **READY TO DEPLOY RIGHT NOW**  
 **Date:** October 30, 2026  
 **Complexity:** Easy (3 simple steps)  
 **Time:** 30-40 minutes total  
-**Cost:** $0/month (free tier)  
+**Cost:** $0/month (free tier)
 
 ---
 
@@ -41,6 +44,7 @@
 ```
 
 **Why this approach:**
+
 - ✅ Vercel is optimized for Next.js (instant deployment)
 - ✅ Render supports Fastify (no conversion needed)
 - ✅ MongoDB Atlas is the standard for Node.js apps
@@ -52,6 +56,7 @@
 ## 📋 3-Step Deployment Checklist
 
 ### STEP 1: MongoDB Atlas (5-10 min)
+
 ```
 [ ] Create account at https://www.mongodb.com/cloud/atlas
 [ ] Create Free Cluster
@@ -62,6 +67,7 @@
 ```
 
 ### STEP 2: Render Backend (10-15 min)
+
 ```
 [ ] Create account at https://render.com (with GitHub)
 [ ] Create Web Service
@@ -76,6 +82,7 @@
 ```
 
 ### STEP 3: Vercel Frontend (10-15 min)
+
 ```
 [ ] Create account at https://vercel.com (with GitHub)
 [ ] Import Project
@@ -92,13 +99,17 @@
 ## 🎯 Files You'll Need to Reference
 
 ### Quick Start Guide
+
 📄 **VERCEL_QUICK_START.md** (this directory)
+
 - 3-step checklist
 - Configuration reference
 - Common fixes
 
-### Complete Deployment Guide  
+### Complete Deployment Guide
+
 📄 **VERCEL_DEPLOYMENT_GUIDE.md** (this directory)
+
 - Step-by-step instructions
 - Environment variables explained
 - Free tier limitations
@@ -106,7 +117,9 @@
 - Security notes
 
 ### Vercel Configuration
+
 📄 **vercel.json** (root directory)
+
 - Project settings
 - Build configuration
 - Node.js version
@@ -116,12 +129,14 @@
 ## 🔑 Key Environment Variables
 
 ### Frontend (Vercel) - 2 variables
+
 ```
 NEXT_PUBLIC_API_URL = https://atc-api-xxxxx.onrender.com
 NODE_ENV = production
 ```
 
 ### Backend (Render) - 14 variables
+
 ```
 MONGODB_URI = mongodb+srv://atc_user:PASSWORD@cluster...
 MONGODB_DB = atc
@@ -146,35 +161,39 @@ RATE_LIMIT_MAX = 120
 ## 🚀 What You're Deploying
 
 ### Frontend (Next.js)
+
 ✅ Dashboard page  
 ✅ Markets page (live quotes - EUR/USD, GBP/USD, XAU/USD)  
 ✅ Tasks page (to-do management)  
 ✅ Calendar page (economic events)  
 ✅ News page (RSS feed)  
 ✅ Analysis page (technical indicators)  
-✅ **Copilot page** (AI analysis - Phase 6 NEW!)  
+✅ **Copilot page** (AI analysis - Phase 6 NEW!)
 
 ### Backend (Fastify API)
+
 ✅ 40+ endpoints  
 ✅ Health checks  
 ✅ Market data (quotes, candles, instruments)  
 ✅ Technical analysis (8 indicators, 9 patterns)  
 ✅ News aggregation  
 ✅ Economic calendar  
-✅ **AI Copilot** (analyze trades, evidence bundle)  
+✅ **AI Copilot** (analyze trades, evidence bundle)
 
 ### Database (MongoDB)
+
 ✅ Quote cache  
 ✅ Candle history  
 ✅ User preferences  
 ✅ AI analysis history  
-✅ Paper trading records  
+✅ Paper trading records
 
 ---
 
 ## ✅ Verification Checklist (After Deployment)
 
 ### Backend Health
+
 ```bash
 [ ] curl https://atc-api-xxxxx.onrender.com/health
     Expected: {"status":"ok",...}
@@ -183,6 +202,7 @@ RATE_LIMIT_MAX = 120
 ```
 
 ### Frontend Pages
+
 ```
 [ ] Visit https://atc-web.vercel.app/
 [ ] Check all 7 pages load:
@@ -197,6 +217,7 @@ RATE_LIMIT_MAX = 120
 ```
 
 ### API Integration
+
 ```
 [ ] /markets shows live EUR/USD, GBP/USD, XAU/USD quotes
 [ ] /analysis shows technical indicators chart
@@ -234,6 +255,7 @@ TOTAL COST:         $0/month 🎉
 ## ⚠️ Important Notes
 
 ### Auto-Pause on Render (Free Tier)
+
 ```
 What: API goes to sleep after 15 min of no traffic
 Effect: First request takes ~30 seconds
@@ -242,6 +264,7 @@ Fix: Upgrade to $7/month paid plan (or ignore for dev)
 ```
 
 ### Cold Start is OK
+
 ```
 What: First request after sleep takes ~30 seconds
 Why: Render free tier spins down to save resources
@@ -251,6 +274,7 @@ For production: Upgrade to paid tier
 ```
 
 ### MongoDB Connection String
+
 ```
 Format: mongodb+srv://USER:PASSWORD@CLUSTER.mongodb.net/DB
 ⚠️  Don't lose this! Store it safely (Render env vars)
@@ -278,24 +302,28 @@ You can do all 3 in parallel if comfortable with UI.
 ## 🎯 After Deployment
 
 ### Immediate (Next 15 min)
+
 - ✅ Visit your Vercel URL
 - ✅ Try clicking through pages
 - ✅ Test /copilot AI analysis
 - ✅ Check browser console (F12) for errors
 
 ### Next Hour
+
 - ✅ Share URL with team
 - ✅ Get feedback on UI/features
 - ✅ Monitor Render logs for errors
 - ✅ Check MongoDB connection
 
 ### Next Day
+
 - ✅ Plan Phase 7 (Risk & Paper Trading)
 - ✅ Decide on paid upgrades (if needed)
 - ✅ Set up monitoring/alerts
 - ✅ Document deployment steps for team
 
 ### Next Week
+
 - ✅ Enable authentication (AUTH_MODE=session)
 - ✅ Set up backup strategy
 - ✅ Configure custom domains (if desired)
@@ -308,6 +336,7 @@ You can do all 3 in parallel if comfortable with UI.
 **Troubleshooting Guide:** See VERCEL_DEPLOYMENT_GUIDE.md (sections: Troubleshooting)
 
 **Common Issues:**
+
 ```
 "API not responding"
   → Wait 30 seconds (cold start)
@@ -328,6 +357,7 @@ You can do all 3 in parallel if comfortable with UI.
 ## 🏆 Summary
 
 ### What You Have
+
 ```
 ✅ Phase 1-6 complete (376 tests passing)
 ✅ Production-ready codebase
@@ -338,6 +368,7 @@ You can do all 3 in parallel if comfortable with UI.
 ```
 
 ### What You're About to Get
+
 ```
 ✅ Live frontend at Vercel
 ✅ Live API at Render
@@ -348,9 +379,10 @@ You can do all 3 in parallel if comfortable with UI.
 ```
 
 ### Your Next Step
+
 📖 **Read:** VERCEL_QUICK_START.md (step-by-step checklist)  
 🚀 **Then:** Follow the 3 steps (30-40 min total)  
-🎉 **Result:** Your app is live!  
+🎉 **Result:** Your app is live!
 
 ---
 
@@ -363,6 +395,7 @@ You can do all 3 in parallel if comfortable with UI.
 ---
 
 Files Created:
+
 - ✅ `vercel.json` — Vercel configuration
 - ✅ `VERCEL_DEPLOYMENT_GUIDE.md` — Complete guide (30+ pages)
 - ✅ `VERCEL_QUICK_START.md` — Quick checklist

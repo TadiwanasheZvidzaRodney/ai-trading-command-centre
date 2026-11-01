@@ -8,6 +8,7 @@ import { buildServer } from './server.js';
 async function main(): Promise<void> {
   const env = loadEnv();
   const logger = createLogger(env);
+  const port = env.PORT ?? env.API_PORT;
 
   const mongo = new MongoConnection(env.MONGODB_URI, env.MONGODB_DB);
 
@@ -52,10 +53,10 @@ async function main(): Promise<void> {
   });
 
   try {
-    await app.listen({ host: env.API_HOST, port: env.API_PORT });
+    await app.listen({ host: env.API_HOST, port });
     logger.info(
       {
-        port: env.API_PORT,
+        port,
         authMode: env.AUTH_MODE,
         tradingMode: env.TRADING_MODE,
         scheduler: env.ENABLE_SCHEDULER,

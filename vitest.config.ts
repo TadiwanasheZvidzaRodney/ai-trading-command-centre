@@ -19,7 +19,7 @@ export default defineConfig({
   resolve: { alias },
   test: {
     environment: 'node',
-    include: ['packages/**/*.test.ts', 'apps/api/**/*.test.ts'],
+    include: ['packages/**/*.test.ts', 'apps/api/**/*.test.ts', 'scripts/**/*.test.ts'],
     exclude: ['**/node_modules/**', '**/dist/**', '**/.next/**'],
     testTimeout: 20_000,
     hookTimeout: 20_000,

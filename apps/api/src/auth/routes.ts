@@ -13,7 +13,7 @@ function sessionCookieOptions(env: Env): CookieSerializeOptions {
   return {
     path: '/',
     httpOnly: true,
-    sameSite: 'lax',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: env.NODE_ENV === 'production',
     maxAge: env.SESSION_TTL_HOURS * 60 * 60,
   };
@@ -23,7 +23,7 @@ function csrfCookieOptions(env: Env): CookieSerializeOptions {
   return {
     path: '/',
     httpOnly: false,
-    sameSite: 'lax',
+    sameSite: env.NODE_ENV === 'production' ? 'none' : 'lax',
     secure: env.NODE_ENV === 'production',
     maxAge: env.SESSION_TTL_HOURS * 60 * 60,
   };
