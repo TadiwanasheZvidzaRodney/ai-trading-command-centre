@@ -10,6 +10,13 @@ const nextConfig: NextConfig = {
   poweredByHeader: false,
   transpilePackages: ['@atc/shared'],
   agentRules: false,
+  async rewrites() {
+    const apiOrigin = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
+    return [
+      { source: '/health/:path*', destination: `${apiOrigin}/health/:path*` },
+      { source: '/api/:path*', destination: `${apiOrigin}/api/:path*` },
+    ];
+  },
 };
 
 export default nextConfig;

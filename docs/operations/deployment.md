@@ -179,10 +179,10 @@ be pushed to its upstream branch. The CLI never prints secret values. `doctor` r
 variable names and readiness only.
 
 Set `WEB_URL` to the exact Vercel origin and `API_URL`/`NEXT_PUBLIC_API_URL` to the
-Render origin. Production cookies are `Secure; SameSite=None` for cross-site browser
-requests, with exact-origin CORS and CSRF token validation. Related custom domains such
-as `app.example.com` and `api.example.com` are preferable; browser third-party-cookie
-settings can still restrict unrelated `vercel.app` and `onrender.com` sites.
+Render origin. In production, the browser calls same-origin `/api/*` and `/health/*`
+paths on Vercel, which Next.js rewrites to Render. This keeps session cookies first-party
+even when using the default `vercel.app` and `onrender.com` domains. Local development
+continues to call the API origin directly.
 
 The Render API deploy endpoint builds a commit already available in the connected Git
 repository; it does not upload uncommitted local code. Free Render services may sleep,
