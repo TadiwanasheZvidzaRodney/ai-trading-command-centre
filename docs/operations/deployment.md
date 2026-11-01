@@ -129,8 +129,10 @@ targets those existing resources; it does not create clusters, users, or network
 The repository root is the build root for both services because npm workspaces and the
 lockfile live there. Set the Vercel project's Root Directory to the repository root.
 The CLI configures the Render service root to `.` with build command
-`npm ci && npm run build -w @atc/api`, start command `npm run start:api`, and readiness
-path `/health/ready`. Render supplies `PORT`; the API validates and listens on it.
+`npm ci --include=dev && npm run build -w @atc/api`, start command `npm run start:api`,
+and readiness path `/health/ready`. `--include=dev` is required because `tsup` is a
+build-time dependency while Render sets `NODE_ENV=production`. Render supplies `PORT`;
+the API validates and listens on it.
 
 Initialize the private deployment file, then populate it locally:
 

@@ -367,7 +367,7 @@ async function configureRender(values: DeploymentValues, dryRun: boolean): Promi
       rootDir: '.',
       serviceDetails: {
         envSpecificDetails: {
-          buildCommand: 'npm ci && npm run build -w @atc/api',
+          buildCommand: 'npm ci --include=dev && npm run build -w @atc/api',
           startCommand: 'npm run start:api',
         },
         healthCheckPath: '/health/ready',
