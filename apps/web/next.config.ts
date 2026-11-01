@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
   async rewrites() {
     const apiOrigin = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:4000';
     return [
+      { source: '/health', destination: `${apiOrigin}/health` },
       { source: '/health/:path*', destination: `${apiOrigin}/health/:path*` },
       { source: '/api/:path*', destination: `${apiOrigin}/api/:path*` },
     ];
