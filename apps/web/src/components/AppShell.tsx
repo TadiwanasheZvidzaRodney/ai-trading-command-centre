@@ -59,7 +59,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   ] as const;
 
   return (
-    <div className="app-shell">
+    <div className={`app-shell ${mobileMenuOpen ? 'sidebar-open' : ''}`}>
       <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`} role="navigation" aria-label="Site navigation">
         <div className="sidebar-header">
           <Link href="/" className="brand" onClick={() => setMobileMenuOpen(false)}>
@@ -145,7 +145,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <main className="content">{children}</main>
+        <main className="content" onClick={mobileMenuOpen ? () => setMobileMenuOpen(false) : undefined}>{children}</main>
 
         {/* Mobile Bottom Navigation */}
         <nav className="bottom-nav" aria-label="Mobile navigation">
