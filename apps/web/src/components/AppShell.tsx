@@ -11,12 +11,15 @@ import {
   LayoutDashboard,
   LineChart,
   ListChecks,
+  Menu,
   Newspaper,
   Settings,
   ShieldCheck,
+  X,
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import { useState } from 'react';
 import { useAuthStatus, useHealth } from '@/lib/hooks';
 
 const NAV_ITEMS = [
@@ -38,26 +41,49 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const { data: health } = useHealth();
   const { data: auth } = useAuthStatus();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const online = health?.status === 'ok';
   const active = NAV_ITEMS.find((item) =>
     item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
   );
 
+  // Top navigation items (desktop + mobile menu)
+  const topNavItems = NAV_ITEMS.slice(0, 9);
+  // Bottom navigation items (mobile only - most frequent)
+  const bottomNavItems = [
+    NAV_ITEMS[0], // Overview
+    NAV_ITEMS[1], // Markets
+    NAV_ITEMS[6], // Planner
+    NAV_ITEMS[7], // Paper trading
+    NAV_ITEMS[8], // Journal
+  ];
+
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <Link href="/" className="brand">
-          <span className="brand-mark">
-            <Activity size={18} strokeWidth={2.2} />
-          </span>
-          <span>
-            <strong>ATC</strong>
-            <small>Trading Command</small>
-          </span>
-        </Link>
+      <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
+        <div className="sidebar-header">
+          <Link href="/" className="brand" onClick={() => setMobileMenuOpen(false)}>
+            <span className="brand-mark">
+              <Activity size={18} strokeWidth={2.2} />
+            </span>
+            <span>
+              <strong>ATC</strong>
+              <small>Trading Command</small>
+            </span>
+          </Link>
+          
+          <button
+            className="mobile-menu-close"
+            onClick={() => setMobileMenuOpen(false)}
+            aria-label="Close menu"
+            aria-expanded={mobileMenuOpen}
+          >
+            <X size={24} />
+          </button>
+        </div>
 
         <nav className="nav" aria-label="Main navigation">
-          {NAV_ITEMS.map((item) => {
+          {topNavItems.map((item) => {
             const Icon = item.icon;
             const isActive =
               item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
@@ -67,6 +93,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={`nav-item ${isActive ? 'active' : ''}`}
                 aria-current={isActive ? 'page' : undefined}
+                onClick={() => setMobileMenuOpen(false)}
               >
                 <Icon size={16} strokeWidth={1.9} />
                 <span>{item.label}</span>
@@ -92,6 +119,14 @@ export function AppShell({ children }: { children: React.ReactNode }) {
             <h1>{active?.label ?? 'Workspace'}</h1>
           </div>
           <div className="topbar-meta">
+            <button
+              className="mobile-menu-btn"
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              aria-label="Toggle menu"
+              aria-expanded={mobileMenuOpen}
+            >
+              <Menu size={24} />
+            </button>
             <span className={`status-dot ${online ? 'ok' : 'error'}`} aria-hidden />
             <span>{online ? 'API online' : 'API offline'}</span>
             {health && (
@@ -111,6 +146,27 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         )}
 
         <main className="content">{children}</main>
+
+        {/* Mobile Bottom Navigation */}
+        <nav className="bottom-nav" aria-label="Mobile navigation">
+          {bottomNavItems.map((item) => {
+            const Icon = item.icon;
+            const isActive =
+              item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className={`bottom-nav-item ${isActive ? 'active' : ''}`}
+                aria-current={isActive ? 'page' : undefined}
+                title={item.label}
+              >
+                <Icon size={24} strokeWidth={1.8} />
+                <span className="bottom-nav-label">{item.label}</span>
+              </Link>
+            );
+          })}
+        </nav>
       </div>
     </div>
   );
