@@ -126,6 +126,7 @@
   }
 
   .sidebar .nav {
+    flex-direction: column;
     padding: 10px 12px;
     gap: 4px;
   }
@@ -773,8 +774,7 @@ html {
 }
 
 .table-wrap,
-.nav,
-.sidebar {
+.nav {
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
 }
