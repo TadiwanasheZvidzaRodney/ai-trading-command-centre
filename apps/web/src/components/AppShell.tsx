@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useAuthStatus, useHealth } from '@/lib/hooks';
 
 const NAV_ITEMS = [
@@ -47,13 +47,36 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
   );
 
-  // Close menu when pathname changes (navigation occurred)
+  const closeMenu = useCallback(() => {
+    setMobileMenuOpen(false);
+  }, []);
+
+  // Close menu on pathname change
   useEffect(() => {
     setMobileMenuOpen(false);
   }, [pathname]);
 
-  // Top navigation items (desktop + mobile menu)
-  const topNavItems = NAV_ITEMS.slice(0, 9);
+  // Lock body scroll and listen for Escape key when menu is open
+  useEffect(() => {
+    if (!mobileMenuOpen) return;
+
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        closeMenu();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      window.removeEventListener('keydown', handleKeyDown);
+    };
+  }, [mobileMenuOpen, closeMenu]);
+
   // Bottom navigation items (mobile only - most frequent)
   const bottomNavItems = [
     NAV_ITEMS[0],
@@ -63,24 +86,31 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     NAV_ITEMS[8],
   ] as const;
 
-  const handleOverlayClick = () => {
-    setMobileMenuOpen(false);
-  };
-
   return (
     <div className={`app-shell ${mobileMenuOpen ? 'sidebar-open' : ''}`}>
-      {/* Overlay - Click to close */}
+      {/* Mobile Drawer Backdrop Overlay */}
       {mobileMenuOpen && (
         <div
           className="sidebar-overlay"
-          onClick={handleOverlayClick}
-          aria-hidden="true"
+          onClick={closeMenu}
+          onTouchEnd={closeMenu}
+          role="button"
+          tabIndex={0}
+          aria-label="Close navigation drawer"
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') closeMenu();
+          }}
         />
       )}
 
-      <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`} role="navigation" aria-label="Site navigation">
+      {/* Navigation Sidebar / Mobile Drawer */}
+      <aside
+        className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}
+        role="navigation"
+        aria-label="Site navigation"
+      >
         <div className="sidebar-header">
-          <Link href="/" className="brand">
+          <Link href="/" className="brand" onClick={closeMenu}>
             <span className="brand-mark">
               <Activity size={18} strokeWidth={2.2} />
             </span>
@@ -91,17 +121,17 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
 
           <button
+            type="button"
             className="mobile-menu-close"
-            onClick={() => setMobileMenuOpen(false)}
+            onClick={closeMenu}
             aria-label="Close menu"
-            aria-expanded={mobileMenuOpen}
           >
-            <X size={24} />
+            <X size={20} />
           </button>
         </div>
 
         <nav className="nav" aria-label="Main navigation">
-          {topNavItems.map((item) => {
+          {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const isActive =
               item.href === '/' ? pathname === '/' : pathname.startsWith(item.href);
@@ -111,6 +141,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={`nav-item ${isActive ? 'active' : ''}`}
                 aria-current={isActive ? 'page' : undefined}
+                onClick={closeMenu}
               >
                 <Icon size={16} strokeWidth={1.9} />
                 <span>{item.label}</span>
@@ -129,29 +160,48 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       </aside>
 
+      {/* Main Workspace Area */}
       <div className="main">
         <header className="topbar">
-          <div>
-            <span className="eyebrow">AI Trading Command Centre</span>
-            <h1>{active?.label ?? 'Workspace'}</h1>
+          <div className="topbar-left">
+            <Link href="/" className="mobile-brand" onClick={closeMenu}>
+              <span className="brand-mark">
+                <Activity size={16} strokeWidth={2.2} />
+              </span>
+              <span className="mobile-brand-name">ATC</span>
+            </Link>
+
+            <span className="topbar-divider" aria-hidden="true" />
+
+            <div className="topbar-heading">
+              <span className="eyebrow">AI Trading Command</span>
+              <h1>{active?.label ?? 'Workspace'}</h1>
+            </div>
           </div>
+
           <div className="topbar-meta">
-            <button
-              className="mobile-menu-btn"
-              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              aria-label="Toggle menu"
-              aria-expanded={mobileMenuOpen}
-            >
-              <Menu size={24} />
-            </button>
-            <span className={`status-dot ${online ? 'ok' : 'error'}`} aria-hidden />
-            <span>{online ? 'API online' : 'API offline'}</span>
+            <span
+              className={`status-dot ${online ? 'ok' : 'error'}`}
+              title={online ? 'API online' : 'API offline'}
+              aria-label={online ? 'API online' : 'API offline'}
+            />
+            <span className="topbar-status-text">{online ? 'API online' : 'API offline'}</span>
             {health && (
-              <span className="mono muted">
+              <span className="mono muted topbar-latency">
                 {health.checks.database.latencyMs.toFixed(1)} ms db
               </span>
             )}
             {auth?.user && <span className="user-chip">{auth.user.username}</span>}
+
+            <button
+              type="button"
+              className="mobile-menu-btn"
+              onClick={() => setMobileMenuOpen((prev) => !prev)}
+              aria-label={mobileMenuOpen ? 'Close menu' : 'Open menu'}
+              aria-expanded={mobileMenuOpen}
+            >
+              {mobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
+            </button>
           </div>
         </header>
 
@@ -177,8 +227,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 className={`bottom-nav-item ${isActive ? 'active' : ''}`}
                 aria-current={isActive ? 'page' : undefined}
                 title={item.label}
+                onClick={closeMenu}
               >
-                <Icon size={24} strokeWidth={1.8} />
+                <Icon size={22} strokeWidth={1.8} />
                 <span className="bottom-nav-label">{item.label}</span>
               </Link>
             );
