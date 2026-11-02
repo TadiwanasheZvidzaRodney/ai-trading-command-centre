@@ -35,7 +35,7 @@ const NAV_ITEMS = [
   { href: '/backtests', label: 'Backtests', icon: ClipboardList, phase: 8 },
   { href: '/tasks', label: 'Tasks', icon: ListChecks, phase: 3 },
   { href: '/settings', label: 'Settings', icon: Settings, phase: 9 },
-];
+] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -51,12 +51,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   const topNavItems = NAV_ITEMS.slice(0, 9);
   // Bottom navigation items (mobile only - most frequent)
   const bottomNavItems = [
-    NAV_ITEMS[0], // Overview
-    NAV_ITEMS[1], // Markets
-    NAV_ITEMS[6], // Planner
-    NAV_ITEMS[7], // Paper trading
-    NAV_ITEMS[8], // Journal
-  ];
+    NAV_ITEMS[0],
+    NAV_ITEMS[1],
+    NAV_ITEMS[6],
+    NAV_ITEMS[7],
+    NAV_ITEMS[8],
+  ] as const;
 
   return (
     <div className="app-shell">
@@ -71,7 +71,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               <small>Trading Command</small>
             </span>
           </Link>
-          
+
           <button
             className="mobile-menu-close"
             onClick={() => setMobileMenuOpen(false)}
