@@ -32,6 +32,7 @@ import { registerTechnicalRoutes } from './technical/routes.js';
 import { MongoTaskStore, type TaskStore } from './tasks/repository.js';
 import { registerTaskRoutes } from './tasks/routes.js';
 import { registerCopilotRoutes, type AIAnalysisService } from './copilot/routes.js';
+import { registerPaperTradingRoutes } from './paper-trading/routes.js';
 
 const VERSION = '0.1.0';
 
@@ -216,6 +217,9 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   await registerTechnicalRoutes(app, { marketData });
   await registerTaskRoutes(app, { store: taskStore });
   await registerIntelligenceRoutes(app, { news, calendar });
+  if (db.db) {
+    await registerPaperTradingRoutes(app, { db: db.db, env });
+  }
   if (options.aiAnalysis) {
     await registerCopilotRoutes(app, { aiAnalysis: options.aiAnalysis });
   }

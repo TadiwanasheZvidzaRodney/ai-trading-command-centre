@@ -408,3 +408,121 @@ export function useCopilotHistory(
 
   return { data, error, isLoading, refetch: fetch };
 }
+
+/* ---------- Paper Trading ---------- */
+
+export interface PaperAccountResponse {
+  startingBalance: number;
+  currentBalance: number;
+  realizedPnL: number;
+  unrealizedPnL: number;
+  totalPnL: number;
+  accountPnLPct: number;
+  timestamp: string;
+}
+
+export interface PaperOrder {
+  id: string;
+  instrument: InstrumentSymbol;
+  side: 'buy' | 'sell';
+  quantity: number;
+  entryPrice: number;
+  stopPrice: number;
+  targetPrice: number;
+  status: 'pending' | 'filled' | 'cancelled';
+  notes?: string;
+  createdAt: string;
+  filledAt?: string;
+}
+
+export interface PaperPosition {
+  id: string;
+  orderId: string;
+  instrument: InstrumentSymbol;
+  side: 'buy' | 'sell';
+  quantity: number;
+  entryPrice: number;
+  currentPrice: number;
+  unrealizedPnL: number;
+  unrealizedPnLPct: number;
+  openedAt: string;
+}
+
+export interface PaperTrade {
+  id: string;
+  instrument: InstrumentSymbol;
+  side: 'buy' | 'sell';
+  quantity: number;
+  entryPrice: number;
+  exitPrice: number;
+  realizedPnL: number;
+  realizedPnLPct: number;
+  rMultiple: number;
+  duration: string;
+  notes?: string;
+  openedAt: string;
+  closedAt: string;
+}
+
+export interface PaperAnalyticsResponse {
+  totalTrades: number;
+  openTrades: number;
+  closedTrades: number;
+  winRate: number;
+  profitFactor: number;
+  expectancy: number;
+  maxDD: number;
+  totalRealizedPnL: number;
+  accountBalance: number;
+  timestamp: string;
+}
+
+export interface RiskLimitsResponse {
+  perTradeRiskPct: number;
+  dailyLossPct: number;
+  maxOpenRiskPct: number;
+  maxPositions: number;
+  minRR: number;
+  correlationThreshold: number;
+}
+
+export function usePaperAccount() {
+  return useApi<PaperAccountResponse>('/api/v1/paper/account', { refreshInterval: 10_000 });
+}
+
+export function usePaperOrders(filters?: { status?: string; instrument?: InstrumentSymbol }) {
+  const params = new URLSearchParams();
+  if (filters?.status) params.set('status', filters.status);
+  if (filters?.instrument) params.set('instrument', filters.instrument);
+  const query = params.toString();
+  return useApi<{ orders: PaperOrder[]; total: number }>(
+    `/api/v1/paper-orders${query ? `?${query}` : ''}`,
+    { refreshInterval: 10_000 },
+  );
+}
+
+export function usePaperPositions() {
+  return useApi<{ positions: PaperPosition[]; total: number }>('/api/v1/paper-positions', {
+    refreshInterval: 10_000,
+  });
+}
+
+export function usePaperTrades(page = 0, filters?: { instrument?: InstrumentSymbol }) {
+  const params = new URLSearchParams();
+  params.set('limit', '20');
+  params.set('offset', String(page * 20));
+  if (filters?.instrument) params.set('instrument', filters.instrument);
+  const query = params.toString();
+  return useApi<{ trades: PaperTrade[]; total: number; limit: number; offset: number }>(
+    `/api/v1/paper-trades?${query}`,
+    { refreshInterval: 30_000 },
+  );
+}
+
+export function usePaperAnalytics() {
+  return useApi<PaperAnalyticsResponse>('/api/v1/paper-analytics', { refreshInterval: 30_000 });
+}
+
+export function useRiskLimits() {
+  return useApi<RiskLimitsResponse>('/api/v1/risk/limits', { refreshInterval: 300_000 });
+}

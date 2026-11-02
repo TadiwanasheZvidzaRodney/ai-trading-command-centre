@@ -1,0 +1,37 @@
+{
+  "name": "@atc/paper-trading",
+  "version": "0.1.0",
+  "description": "Paper trading engine with order execution, fill logic, and P&L tracking",
+  "type": "module",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./engine": {
+      "import": "./dist/engine/index.js",
+      "types": "./dist/engine/index.d.ts"
+    },
+    "./types": {
+      "import": "./dist/types.js",
+      "types": "./dist/types.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "echo 'Type checking only'",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@atc/shared": "*",
+    "@atc/risk-engine": "*",
+    "decimal.js": "^10.6.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "typescript": "^5.9.3",
+    "vitest": "^5.0.5"
+  }
+}
