@@ -107,7 +107,123 @@
     transform: translateX(0);
   }
 
-  .app-shell::before {\n    content: '';\n    position: fixed;\n    inset: 0;\n    background: rgba(0, 0, 0, 0.5);\n    opacity: 0;\n    pointer-events: none;\n    transition: opacity 0.3s ease;\n    z-index: 999;\n  }\n\n  .sidebar.open ~ .main::before {\n    opacity: 1;\n    pointer-events: auto;\n  }\n}\n\n@media (min-width: 901px) {\n  .sidebar-header {\n    display: none;\n  }\n}\n\n/* =========================================================================\n   BOTTOM NAVIGATION - MOBILE ONLY\n   ========================================================================= */\n\n.bottom-nav {\n  position: fixed;\n  bottom: 0;\n  left: 0;\n  right: 0;\n  display: grid;\n  grid-template-columns: repeat(5, 1fr);\n  gap: 0;\n  height: auto;\n  padding: 8px 0;\n  background: linear-gradient(180deg, var(--bg) 0%, var(--panel) 100%);\n  border-top: 1px solid var(--border);\n  z-index: 100;\n  -webkit-overflow-scrolling: touch;\n}\n\n@supports (padding: env(safe-area-inset-bottom)) {\n  .bottom-nav {\n    padding-bottom: max(8px, env(safe-area-inset-bottom));\n  }\n}\n\n.bottom-nav-item {\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n  gap: 4px;\n  padding: 6px 4px;\n  color: var(--text-muted);\n  text-decoration: none;\n  font-size: 11px;\n  font-weight: 500;\n  text-align: center;\n  line-height: 1.2;\n  transition: color 0.2s ease, background-color 0.2s ease;\n  min-height: 56px;\n  position: relative;\n}\n\n.bottom-nav-item:hover {\n  color: var(--text);\n  background: rgba(45, 212, 191, 0.05);\n}\n\n.bottom-nav-item:active {\n  background: rgba(45, 212, 191, 0.1);\n  transform: scale(0.95);\n}\n\n.bottom-nav-item.active {\n  color: var(--accent);\n  font-weight: 600;\n}\n\n.bottom-nav-item.active::before {\n  content: '';\n  position: absolute;\n  top: 0;\n  left: 0;\n  right: 0;\n  height: 3px;\n  background: var(--accent);\n  border-radius: 0 0 2px 2px;\n}\n\n.bottom-nav-label {\n  display: block;\n  max-width: 100%;\n  word-wrap: break-word;\n  overflow: hidden;\n  text-overflow: ellipsis;\n  white-space: normal;\n}\n\n@media (min-width: 901px) {\n  .bottom-nav {\n    display: none;\n  }\n}\n\n@media (max-width: 900px) {\n  .content {\n    padding-bottom: max(88px, calc(32px + env(safe-area-inset-bottom))) !important;\n  }\n}\n\n/* =========================================================================\n   TYPOGRAPHY - MOBILE FIRST (14px base)\n   ========================================================================= */
+  .app-shell::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    z-index: 999;
+  }
+
+  .sidebar.open ~ .main::before {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+
+@media (min-width: 901px) {
+  .sidebar-header {
+    display: none;
+  }
+}
+
+/* =========================================================================
+   BOTTOM NAVIGATION - MOBILE ONLY
+   ========================================================================= */
+
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 0;
+  height: auto;
+  padding: 8px 0;
+  background: linear-gradient(180deg, var(--bg) 0%, var(--panel) 100%);
+  border-top: 1px solid var(--border);
+  z-index: 100;
+  -webkit-overflow-scrolling: touch;
+}
+
+@supports (padding: env(safe-area-inset-bottom)) {
+  .bottom-nav {
+    padding-bottom: max(8px, env(safe-area-inset-bottom));
+  }
+}
+
+.bottom-nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px;
+  color: var(--text-muted);
+  text-decoration: none;
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+  line-height: 1.2;
+  transition: color 0.2s ease, background-color 0.2s ease;
+  min-height: 56px;
+  position: relative;
+}
+
+.bottom-nav-item:hover {
+  color: var(--text);
+  background: rgba(45, 212, 191, 0.05);
+}
+
+.bottom-nav-item:active {
+  background: rgba(45, 212, 191, 0.1);
+  transform: scale(0.95);
+}
+
+.bottom-nav-item.active {
+  color: var(--accent);
+  font-weight: 600;
+}
+
+.bottom-nav-item.active::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: var(--accent);
+  border-radius: 0 0 2px 2px;
+}
+
+.bottom-nav-label {
+  display: block;
+  max-width: 100%;
+  word-wrap: break-word;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: normal;
+}
+
+@media (min-width: 901px) {
+  .bottom-nav {
+    display: none;
+  }
+}
+
+@media (max-width: 900px) {
+  .content {
+    padding-bottom: max(88px, calc(32px + env(safe-area-inset-bottom))) !important;
+  }
+}
+
+/* =========================================================================
+   TYPOGRAPHY - MOBILE FIRST (14px base)
+   ========================================================================= */
 
 @media (max-width: 375px) {
   body {
@@ -142,7 +258,7 @@
 
 .app-shell {
   grid-template-columns: 1fr;
-  min-height: 100dvh; /* Use dynamic viewport height for mobile */
+  min-height: 100dvh;
 }
 
 .sidebar {
@@ -154,7 +270,7 @@
   border-right: none;
   border-bottom: 1px solid var(--border);
   overflow-x: auto;
-  -webkit-overflow-scrolling: touch; /* Smooth momentum scrolling on iOS */
+  -webkit-overflow-scrolling: touch;
 }
 
 .nav {
@@ -266,9 +382,26 @@
     font-size: 19px;
   }
 
+  .topbar .eyebrow {
+    display: block;
+  }
+
   .topbar-meta {
     width: auto;
     font-size: 12px;
+    white-space: normal;
+  }
+
+  .topbar-meta > span {
+    display: inline;
+  }
+
+  .topbar-meta .mono {
+    display: inline;
+  }
+
+  .topbar-meta .user-chip {
+    display: inline;
   }
 }
 
@@ -353,7 +486,7 @@
   }
 
   .grid-3 {
-    grid-template-columns: 1fr; /* Still 1 col on small tablets */
+    grid-template-columns: 1fr;
   }
 
   .grid-4 {
@@ -479,7 +612,7 @@
 
 table {
   font-size: 12px;
-  min-width: 500px; /* Prevent table from shrinking on small screens */
+  min-width: 500px;
 }
 
 th {
@@ -517,7 +650,7 @@ td {
   padding: 10px 14px;
   font-size: 12px;
   border-radius: 8px;
-  min-height: 44px; /* iOS touch target minimum */
+  min-height: 44px;
   min-width: 44px;
   display: inline-flex;
   align-items: center;
@@ -534,7 +667,7 @@ td {
 .select,
 .textarea {
   padding: 11px 12px;
-  font-size: 16px; /* Prevents zoom on iOS */
+  font-size: 16px;
   border-radius: 8px;
   min-height: 44px;
 }
@@ -632,7 +765,6 @@ td {
    FOCUS & TOUCH STATES - CRITICAL FOR MOBILE
    ========================================================================= */
 
-/* Remove visible focus on click, keep on tab */
 .btn:focus-visible,
 .input:focus-visible,
 .select:focus-visible,
@@ -641,13 +773,11 @@ td {
   outline-offset: 2px;
 }
 
-/* Active state for touch feedback */
 .btn:active {
   transform: scale(0.98);
   opacity: 0.9;
 }
 
-/* Disable tap highlight on iOS */
 .btn,
 .nav-item,
 .watch-row,
@@ -681,19 +811,16 @@ button {
     color: var(--text);
   }
 
-  /* Ensure text contrast >= 4.5:1 for normal text */
   .card-body,
   .table-wrap {
     color: var(--text);
   }
 
-  /* Secondary text contrast >= 3:1 */
   .text-muted,
   .muted {
     color: var(--text-muted);
   }
 
-  /* Ensure borders are visible in dark mode */
   .card,
   .input,
   .select,
@@ -838,7 +965,6 @@ button {
    PERFORMANCE OPTIMIZATIONS
    ========================================================================= */
 
-/* Reduce motion on scroll */
 html {
   scroll-behavior: smooth;
 }
@@ -849,7 +975,6 @@ html {
   }
 }
 
-/* GPU acceleration for smooth scrolling */
 .table-wrap,
 .nav,
 .workspace {
@@ -861,13 +986,11 @@ html {
    VISIBILITY ENHANCEMENTS
    ========================================================================= */
 
-/* Visible focus indicators */
 :focus-visible {
   outline: 2px solid var(--accent);
   outline-offset: 2px;
 }
 
-/* Ensure disabled elements are clearly disabled */
 :disabled {
   opacity: 0.5;
   cursor: not-allowed;
