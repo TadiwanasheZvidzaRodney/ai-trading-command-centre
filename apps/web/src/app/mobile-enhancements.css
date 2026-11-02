@@ -15,21 +15,17 @@
   position: relative;
 }
 
-.app-shell::before {
-  content: '';
+.sidebar-overlay {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.5);
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 0.3s ease;
   z-index: 999;
+  cursor: pointer;
 }
 
-@media (max-width: 900px) {
-  .app-shell.sidebar-open::before {
-    opacity: 1;
-    pointer-events: auto;
+@media (min-width: 901px) {
+  .sidebar-overlay {
+    display: none !important;
   }
 }
 

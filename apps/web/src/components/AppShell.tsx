@@ -19,7 +19,7 @@ import {
 } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useAuthStatus, useHealth } from '@/lib/hooks';
 
 const NAV_ITEMS = [
@@ -47,6 +47,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     item.href === '/' ? pathname === '/' : pathname.startsWith(item.href),
   );
 
+  // Close menu when pathname changes (navigation occurred)
+  useEffect(() => {
+    setMobileMenuOpen(false);
+  }, [pathname]);
+
   // Top navigation items (desktop + mobile menu)
   const topNavItems = NAV_ITEMS.slice(0, 9);
   // Bottom navigation items (mobile only - most frequent)
@@ -58,11 +63,24 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     NAV_ITEMS[8],
   ] as const;
 
+  const handleOverlayClick = () => {
+    setMobileMenuOpen(false);
+  };
+
   return (
     <div className={`app-shell ${mobileMenuOpen ? 'sidebar-open' : ''}`}>
+      {/* Overlay - Click to close */}
+      {mobileMenuOpen && (
+        <div
+          className="sidebar-overlay"
+          onClick={handleOverlayClick}
+          aria-hidden="true"
+        />
+      )}
+
       <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`} role="navigation" aria-label="Site navigation">
         <div className="sidebar-header">
-          <Link href="/" className="brand" onClick={() => setMobileMenuOpen(false)}>
+          <Link href="/" className="brand">
             <span className="brand-mark">
               <Activity size={18} strokeWidth={2.2} />
             </span>
@@ -93,7 +111,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
                 href={item.href}
                 className={`nav-item ${isActive ? 'active' : ''}`}
                 aria-current={isActive ? 'page' : undefined}
-                onClick={() => setMobileMenuOpen(false)}
               >
                 <Icon size={16} strokeWidth={1.9} />
                 <span>{item.label}</span>
@@ -145,7 +162,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         )}
 
-        <main className="content" onClick={mobileMenuOpen ? () => setMobileMenuOpen(false) : undefined}>{children}</main>
+        <main className="content">{children}</main>
 
         {/* Mobile Bottom Navigation */}
         <nav className="bottom-nav" aria-label="Mobile navigation">
