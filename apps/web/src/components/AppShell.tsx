@@ -60,7 +60,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="app-shell">
-      <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`}>
+      <aside className={`sidebar ${mobileMenuOpen ? 'open' : ''}`} role="navigation" aria-label="Site navigation">
         <div className="sidebar-header">
           <Link href="/" className="brand" onClick={() => setMobileMenuOpen(false)}>
             <span className="brand-mark">
