@@ -1,173 +1,176 @@
 # AI Trading Command Centre
 
-A personal, evidence-first trading research workspace for **XAU/USD, EUR/USD and GBP/USD**.
-It combines real market data, deterministic technical analysis, news, an economic calendar,
-trade planning, risk controls, paper trading, journaling and backtesting in one place.
+A personal, evidence-first trading research and execution workspace for **XAU/USD, EUR/USD, and GBP/USD**. It unifies live market quotes, technical indicators, pattern and market-structure detection, macro intelligence, deterministic risk controls, paper execution, journaling, and backtesting.
 
-> This is a decision-support and research tool, **not** a promise of profitability.
-> It starts in research mode and moves to paper trading. Live execution is disabled by
-> default and is not implemented. Market data can be delayed, incomplete or wrong.
+> **Research & Paper Trading Notice:** This software is a personal decision-support system. Live trading is permanently disabled in the core system by default to protect capital (`LIVE_TRADING_ENABLED=false`). Market data feeds are reference-grade, and AI outputs are interpretation tools rather than trading advice.
 
-**Current status:** Phase 0 (architecture and provider decisions), Phase 1
-(foundation), Phase 2 (real market data), Phase 3 (trading workspace), Phase 4
-(news and macro intelligence) and Phase 5 framework (technical analysis) are implemented.
-Feature phases are being built incrementally. See [`docs/implementation-plan.md`](docs/implementation-plan.md)
-for the live status and acceptance evidence.
+---
 
-## Principles
+## Key Features
 
-1. Never fabricate prices, candles, news, calendar events, balances or results.
-2. Show provider, instrument, timestamp, timezone and freshness wherever data appears.
-3. Deterministic code owns every financial calculation and hard risk rule.
-4. AI output is an interpretation layer: schema-validated, source-linked and never
-   able to place, modify or cancel an order.
-5. Fail closed when critical data or risk inputs are missing.
-6. Mock data is allowed only in tests or explicitly labelled development fixtures.
-7. Live trading stays off until a separate, explicitly authorised release gate.
+- **Live Market Feeds:** Real-time bid/ask quotes, spreads, and historical candlestick data across multiple timeframes (`1m` to `1wk`) for XAU/USD, EUR/USD, and GBP/USD.
+- **Deterministic Technical Analysis:** Causal calculations for 8 standard indicators (SMA, EMA, RSI, MACD, ATR, Bollinger Bands, Stochastic, Volume) and 9 candlestick chart patterns with confidence scoring.
+- **Market Structure Detection:** Automated swing high/low mapping, dynamic support/resistance clustering, and trend/range regime classification.
+- **Macro & News Intelligence:** RSS news aggregation with ticker relevance scoring alongside high-impact economic calendar scheduling with event blackout buffers.
+- **AI Analysis & Copilot:** Evidence-grounded market interpretation powered by Google Gemini, local Ollama, or a deterministic facts-only local fallback. Built with strict prompt injection sanitization.
+- **Deterministic Risk Engine:** Server-side rule validation calculating position sizes from contract specifications, enforcing maximum daily loss, per-trade risk percentage, maximum leverage, minimum reward-to-risk (R:R), correlation caps, and an instant kill switch.
+- **Database-Backed Paper Trading:** Idempotent order placement (`idempotencyKey`), immediate market order execution with adverse slippage and commissions, trailing stop/target tracking, live mark-to-market valuations, and account state reconciliation.
+- **Trade Journal & Analytics:** Detailed trade review logging gross P&L, fees/commissions, net P&L, R-multiple outcomes, win rates, and profit factors.
+- **Event-Driven Backtesting:** Historical strategy simulation with next-bar open fills, stop-first intrabar exit handling, causal indicator series, and 60/20/20 development/validation/out-of-sample data splits. Rejects profitability claims without out-of-sample proof.
+- **Production Hardening:** Session authentication with secure `HttpOnly` cookies, double-submit CSRF tokens, strict rate limits, Helmet security headers, structured Pino logging with credential redaction, audit logging, and automated backup/restore verification drills.
 
-## Stack
+---
 
-| Layer | Choice |
+## Core Principles
+
+1. **Evidence-First:** Never fabricate prices, candles, news, calendar events, balances, or performance numbers.
+2. **Provenance & Freshness:** Explicitly display data provider, symbol, timestamps, and age wherever data is shown.
+3. **Deterministic Financial Logic:** Hard risk limits, lot sizing, and P&L calculations are pure deterministic TypeScript; AI never has authority to execute, modify, or cancel orders.
+4. **Fail Closed:** If market data or risk parameters are unavailable, order creation and plan validation fail closed.
+5. **No Look-Ahead Bias:** Backtesting operates sequentially bar-by-bar; indicators and entries strictly depend on historical or current bar close data, filling on the next bar open.
+
+---
+
+## Technology Stack
+
+| Layer | Technologies |
 | --- | --- |
-| Frontend | Next.js 16, React 19, TypeScript |
-| API | Node.js, Fastify 5, TypeScript |
-| Database | MongoDB 8 (local Docker Compose; Atlas free tier is a later option) |
-| Validation | Zod |
-| Charts | TradingView Lightweight Charts (Apache-2.0) |
-| Testing | Vitest; Playwright for critical journeys |
-| Logging | Pino structured logs |
-| Monorepo | npm workspaces |
-| CI | GitHub Actions |
+| **Frontend** | Next.js (App Router), React, TypeScript, CSS Variables |
+| **Backend API** | Node.js, Fastify, Zod validation |
+| **Persistence** | MongoDB (Native Node Driver, partial unique indexes) |
+| **Charts** | TradingView Lightweight Charts |
+| **Logging** | Pino structured JSON logging with sensitive field redaction |
+| **Testing** | Vitest (580+ unit and integration tests) |
+| **Monorepo** | npm workspaces |
 
-## Repository layout
+---
+
+## Repository Layout
 
 ```
 apps/
-  api/                  Fastify API, providers, schedulers, persistence
-  web/                  Next.js workspace UI
+  api/                  Fastify REST API, risk gate, paper trading, and backtest routes
+  web/                  Next.js frontend application
 packages/
-  shared/               Domain types, schemas, time and formatting helpers
-  config/               Environment schema and instrument/risk defaults
-  market-data/          Provider interfaces, adapters, normalisation, quality checks
-  technical-analysis/   Deterministic indicators, structure and strategy rules
-  news/                 RSS ingestion, deduplication, relevance
-  economic-calendar/    Calendar ingestion and timezone normalisation
-  ai-engine/            Evidence bundle, prompt, adapters, output validation
-  risk-engine/          Position sizing and hard risk limits
-  trading-domain/       Orders, paper fills, journal and performance
-docs/                   Architecture, ADRs, provider research, operations, testing
-scripts/                Operational scripts (password hash, seed)
+  ai-copilot/           AI provider abstraction (Gemini, Ollama, Fallback) & sanitization
+  backtesting/          Event-driven backtesting engine, strategies, metrics, and data splits
+  config/               Environment variable schemas, defaults, and validation
+  economic-calendar/    ForexFactory calendar ingestion and time normalisation
+  market-data/          Multi-source quote and candle providers, caching, and health
+  news/                 RSS feed ingestion, keyword relevance scoring, and deduplication
+  paper-trading/        Position tracking, P&L calculations, and order execution helpers
+  risk-engine/          Position sizing, R:R calculation, and risk validation
+  shared/               Cross-cutting types, constants, instrument specifications, and schemas
+  technical-analysis/   Deterministic indicators, candlestick patterns, and market structure
+docs/                   Architecture, decisions, security model, and operational runbooks
+scripts/                Operational tools (backup/restore drill, password hasher, seed data)
 ```
 
-Packages below `packages/config` are added phase by phase; see the implementation plan
-for what exists today.
+---
 
-## Quick start
+## Getting Started
 
 ### Prerequisites
 
-- Node.js 22+ (tested on Node 24)
-- npm 11+
-- Docker Desktop (for local MongoDB)
+- **Node.js** 22+ (tested on Node 24)
+- **npm** 11+
+- **Docker** (for local MongoDB)
 
-### 1. Install and configure
+### 1. Installation & Environment Configuration
+
+Clone the repository and install dependencies:
 
 ```bash
 npm install
 cp .env.example .env
 ```
 
-For local development the template uses `AUTH_MODE=disabled`, which shows a visible
-warning in the UI. To use the login flow instead:
+Key environment configurations in `.env`:
 
-```bash
-npm run auth:hash -- --deploy-file
-# enter the password in the terminal prompt; the hash is written to ignored .env.deploy.local
-# set AUTH_USERNAME in .env.deploy.local and keep AUTH_MODE=session for production
-```
+- `AUTH_MODE`: Set to `disabled` for local development; use `session` for production.
+- `MONGODB_URI`: Connection string (defaults to `mongodb://localhost:27017`).
+- `AI_PROVIDER`: `fallback` (offline, facts-only), `gemini` (Google AI Studio key), or `ollama`.
+- `ENABLE_SCHEDULER`: Set to `true` to run background mark-to-market evaluation and ingestion.
 
-### 2. Start MongoDB
+### 2. Start the Local Database
+
+Start the MongoDB container using Docker Compose:
 
 ```bash
 npm run db:up
 ```
 
-### 3. Run the app
+### 3. Run the Development Servers
+
+Start both the API (`http://localhost:4000`) and the Web UI (`http://localhost:3000`):
 
 ```bash
 npm run dev
 ```
 
-- Web: <http://localhost:3000>
-- Markets (watchlist, candlestick chart, provenance): <http://localhost:3000/markets>
-- News (source-linked RSS headlines and relevance tags): <http://localhost:3000/news>
-- Calendar (UTC week view and high-impact events): <http://localhost:3000/calendar>
-- Tasks (preparation tasks and reminders): <http://localhost:3000/tasks>
-- API: <http://localhost:4000>
-- API health: <http://localhost:4000/health>
-- OpenAPI UI: <http://localhost:4000/docs> (development only)
+### 4. Running Verification Checks
 
-### 4. Verify
+Verify the codebase across all packages:
 
 ```bash
-npm run lint
-npm run typecheck
-npm test
-npm run build
+npm run lint          # Run ESLint across monorepo
+npm run typecheck     # Typecheck all packages and applications
+npm test              # Run the complete Vitest test suite (586+ tests)
+npm run build         # Build production API bundle and static Next.js pages
 ```
 
-Only claim a check passed if it was actually run. The implementation plan records
-the commands and results for each phase.
+---
 
-## Free, no-key data providers
+## Application Navigation
 
-The project is designed to run at **$0** while keeping provider boundaries clean.
-The initial adapters use public, no-key feeds and label their limitations in the UI:
+Once running locally, the following pages are accessible:
 
-| Data | Provider | Auth | Notes |
-| --- | --- | --- | --- |
-| Quotes (XAU/USD, EUR/USD, GBP/USD) | Swissquote public quote feed | None | Real bid/ask, but an undocumented public website feed. Latency and terms are not guaranteed. Reference only, not trading-grade. |
-| Candles (EUR/USD, GBP/USD) | Yahoo Finance chart endpoint | None | Unofficial public endpoint. Reference data, not trading-grade. |
-| Candles (XAU/USD) | Yahoo `GC=F` | None | **COMEX gold futures proxy**, clearly labelled. Not spot XAU/USD. |
-| News | Public RSS feeds (FXStreet, MarketWatch, ECB, Fed, BoE, BBC) | None | Headline + link + published time only. |
-| Economic calendar | Forex Factory community JSON feed | None | This week only, no actual values. Verify against primary sources. |
-| AI narrative | Ollama (local) or Gemini free tier | Optional | Disabled by default; deterministic evidence reports still work. |
+- **Dashboard / Overview (`/`):** Market summary, system health, and navigation cards.
+- **Markets (`/markets`):** Live bid/ask watchlists, candlestick charts, and quote age provenance.
+- **Analysis (`/analysis`):** Multi-timeframe technical indicator panels, pattern alerts, and swing structure.
+- **Copilot (`/copilot`):** AI-assisted analysis and trade idea generation grounded in market evidence.
+- **Planner (`/planner`):** Position size calculation and pre-trade risk constraint validation.
+- **Paper Trading (`/paper`):** Simulated execution dashboard with kill-switch toggle, manual stop/target evaluator, and open order/position monitors.
+- **Trade Journal (`/journal`):** Closed trade history, performance analytics (expectancy, profit factor, drawdown), and trade review notes.
+- **Backtesting (`/backtests`):** Historical strategy evaluation, equity curve visualization, and out-of-sample performance verification.
+- **Calendar (`/calendar`):** High-impact economic news releases with event blackout tracking.
+- **News (`/news`):** Financial headlines with automated currency relevance tagging.
+- **Tasks (`/tasks`):** Operational checklist and trade preparation task manager.
 
-Optional upgrade providers are planned behind the same interfaces:
-**Twelve Data** (free key, XAU/USD history) and **OANDA practice** (free demo
-account, XAU/USD candles and pricing). Add credentials to `.env` when available.
+---
 
-See [`docs/provider-evaluation.md`](docs/provider-evaluation.md) for verification
-details, costs, limits and licensing caveats.
+## Security & Operational Procedures
 
-## Safety model
+- **Authentication & CSRF:** In `session` mode, authentication requires secure HTTP cookies with double-submit CSRF headers on mutating requests. Password hashes are generated using bcrypt:
+  ```bash
+  npm run auth:hash
+  ```
+- **Disaster Recovery Drill:** Test MongoDB backup creation, snapshot extraction, drill database restoration, and verification:
+  ```bash
+  npm run drill:backup
+  ```
+- **Kill Switch:** To instantly halt paper trading and reject all incoming orders, engage the kill switch from the `/paper` dashboard or via the API:
+  ```bash
+  curl -X POST http://localhost:4000/api/v1/risk/kill-switch \
+    -H "Content-Type: application/json" \
+    -d '{"enabled": true, "reason": "Market volatility halt"}'
+  ```
 
-- `TRADING_MODE=research` by default.
-- `LIVE_TRADING_ENABLED=false` is enforced; setting it to `true` does not enable
-  live trading and makes the API refuse to start until a live broker integration
-  exists.
-- Risk limits are server-side and evaluated with deterministic code.
-- All mutating endpoints require authentication (when enabled) and CSRF protection.
-- External news and calendar text is treated as untrusted data and delimited in AI
-  prompts. It cannot grant tools, reveal secrets or bypass risk checks.
+---
 
-## Documentation
+## Documentation Index
 
-- [System design](docs/architecture/system-design.md)
-- [Data flow](docs/architecture/data-flow.md)
-- [Security model](docs/architecture/security-model.md)
-- [ADR-001: initial architecture](docs/decisions/ADR-001-initial-architecture.md)
-- [ADR-002: zero-budget data strategy](docs/decisions/ADR-002-zero-budget-data-strategy.md)
-- [Provider evaluation](docs/provider-evaluation.md)
-- [Implementation plan](docs/implementation-plan.md)
-- [Test strategy](docs/testing/test-strategy.md)
-- [Deployment](docs/operations/deployment.md)
-- [Incident response](docs/operations/incident-response.md)
+- [System Design Architecture](docs/architecture/system-design.md)
+- [Data Flow Specification](docs/architecture/data-flow.md)
+- [Security Model & Threat Boundaries](docs/architecture/security-model.md)
+- [Provider Evaluation & Data Policy](docs/provider-evaluation.md)
+- [Backup & Recovery Runbook](docs/operations/backup-recovery.md)
+- [Deployment Runbook](docs/operations/deployment.md)
+- [Incident Response Guide](docs/operations/incident-response.md)
+- [Testing Strategy](docs/testing/test-strategy.md)
+
+---
 
 ## Disclaimer
 
-Financial markets involve substantial risk. Historical results do not guarantee
-future results. Data may be delayed or incorrect, AI-generated analysis may be
-wrong, and simulated fills may differ from live execution. You are responsible for
-verifying information, complying with provider terms and laws, and authorising any
-live trading activity.
+Financial trading involves substantial risk of loss. Historical performance and backtested simulations do not guarantee future returns. Data feeds may contain inaccuracies or delays, and paper fills do not simulate liquidity blackouts. You are solely responsible for testing, validating, and risk-managing any trading activity.
