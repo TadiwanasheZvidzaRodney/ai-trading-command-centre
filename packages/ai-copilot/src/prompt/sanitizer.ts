@@ -46,7 +46,8 @@ export class InputSanitizer {
   }
 
   private sanitizeString(str: string): string {
-    // Remove control characters
+    // Remove control characters (intentional control-character class).
+    // eslint-disable-next-line no-control-regex
     let cleaned = str.replace(/[\x00-\x1F\x7F]/g, ' ');
 
     // Check for forbidden patterns

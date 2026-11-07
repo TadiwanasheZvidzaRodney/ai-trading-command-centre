@@ -8,6 +8,7 @@ export default tseslint.config(
   {
     ignores: [
       '**/node_modules/**',
+      '**/.opencode/**',
       '**/dist/**',
       '**/.next/**',
       '**/coverage/**',
@@ -34,6 +35,12 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'warn',
       'no-console': ['warn', { allow: ['warn', 'error'] }],
       eqeqeq: ['error', 'always'],
+    },
+  },
+  {
+    files: ['apps/web/public/**/*.js'],
+    languageOptions: {
+      globals: { ...globals.browser, ...globals.serviceworker },
     },
   },
   {

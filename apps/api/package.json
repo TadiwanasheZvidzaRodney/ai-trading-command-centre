@@ -11,11 +11,14 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@atc/backtesting": "*",
     "@atc/config": "*",
     "@atc/ai-copilot": "*",
     "@atc/economic-calendar": "*",
     "@atc/market-data": "*",
     "@atc/news": "*",
+    "@atc/paper-trading": "*",
+    "@atc/risk-engine": "*",
     "@atc/shared": "*",
     "@atc/technical-analysis": "*",
     "@fastify/cookie": "^11.1.5",

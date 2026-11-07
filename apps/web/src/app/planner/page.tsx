@@ -9,6 +9,7 @@ import { RiskSummary } from '@/components/RiskSummary';
 import { api } from '@/lib/api';
 import {
   usePaperAccount,
+  usePaperPositions,
   useRiskLimits,
 } from '@/lib/hooks';
 
@@ -25,12 +26,15 @@ interface CalculationResult {
 interface ValidationResult {
   valid: boolean;
   reason: string;
+  code?: string | null;
   violations: string[];
   suggestions: string[];
+  checks?: Array<{ id: string; ok: boolean; detail: string }>;
 }
 
 export default function PlannerPage() {
   const account = usePaperAccount();
+  const positions = usePaperPositions();
   const limits = useRiskLimits();
 
   const [params, setParams] = useState<TradeParams | null>(null);
@@ -43,6 +47,8 @@ export default function PlannerPage() {
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const accountBalance = account.data?.currentBalance ?? 10000;
+  const openPositions = positions.data?.positions ?? [];
+  const dailyPnL = account.data?.dailyPnL ?? 0;
 
   // Calculate when params change
   const handleParamsChange = useCallback(
@@ -102,8 +108,15 @@ export default function PlannerPage() {
             stopPrice: stop,
             targetPrice: target,
             quantity,
-            currentPositions: [],
-            dailyLossUSD: 0,
+            accountBalance,
+            currentPositions: openPositions.map((position) => ({
+              instrument: position.instrument,
+              side: position.side,
+              quantity: position.quantity,
+              entryPrice: position.entryPrice,
+              stopPrice: position.stopPrice,
+            })),
+            dailyLossUSD: dailyPnL,
           });
           setValidation(result);
         } catch (err) {
@@ -115,7 +128,7 @@ export default function PlannerPage() {
 
       void validatePlan();
     },
-    [accountBalance],
+    [accountBalance, openPositions, dailyPnL],
   );
 
   const handleSubmit = useCallback(
@@ -129,19 +142,17 @@ export default function PlannerPage() {
         const stop = Number(submitParams.stopPrice);
         const target = Number(submitParams.targetPrice);
 
-        const riskAmount = accountBalance * (submitParams.riskPct / 100);
-        const riskPerUnit = Math.abs(entry - stop);
-        const quantity = riskAmount / riskPerUnit;
-
         const response = await api.post<{ orderId: string }>(
           '/api/v1/paper-orders',
           {
+            idempotencyKey: crypto.randomUUID(),
             instrument: submitParams.instrument,
             side: submitParams.side,
+            type: 'market',
             entryPrice: entry,
             stopPrice: stop,
             targetPrice: target,
-            quantity,
+            riskPct: submitParams.riskPct,
             notes: `Trade plan created with ${submitParams.riskPct}% risk`,
           },
         );

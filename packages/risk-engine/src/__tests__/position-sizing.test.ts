@@ -38,11 +38,11 @@ describe('PositionSizingCalculator', () => {
 
       // Account: $10,000, Risk: 1%, Entry: 2000, Stop: 1990
       // Risk amount: $100
-      // Distance: 10 pips
-      // Position size: $100 / (10 pips × $1/pip) = 1 lot
+      // Distance: 1000 pips (pip size 0.01)
+      // Position size: $100 / (1000 pips × $1/pip) = 0.1 lots
       const lots = calculator.calculateLots(10_000, 1, 2000, 1990, 'buy');
 
-      expect(lots).toBe(1);
+      expect(lots).toBe(0.1);
     });
 
     it('should calculate correct lot size for forex buy', () => {
@@ -69,7 +69,7 @@ describe('PositionSizingCalculator', () => {
       const calculator = new PositionSizingCalculator(FOREX_PIP_VALUE, FOREX_CONTRACT_SIZE, FOREX_PIP_SIZE);
 
       // Very small account with large risk distance
-      const lots = calculator.calculateLots(1000, 0.5, 1.0000, 1.0900, 'buy');
+      const lots = calculator.calculateLots(1000, 0.5, 1.0900, 1.0000, 'buy');
 
       expect(lots).toBeGreaterThan(0);
       expect(lots).toBeLessThan(0.1);
@@ -82,11 +82,11 @@ describe('PositionSizingCalculator', () => {
 
       // Account: $10,000, Risk: 1%, Entry: 1990, Stop: 2000
       // Risk amount: $100
-      // Distance: 10 pips
-      // Position size: $100 / (10 pips × $1/pip) = 1 lot
+      // Distance: 1000 pips (pip size 0.01)
+      // Position size: $100 / (1000 pips × $1/pip) = 0.1 lots
       const lots = calculator.calculateLots(10_000, 1, 1990, 2000, 'sell');
 
-      expect(lots).toBe(1);
+      expect(lots).toBe(0.1);
     });
 
     it('should calculate correct lot size for forex sell', () => {
@@ -113,12 +113,12 @@ describe('PositionSizingCalculator', () => {
 
       const result = calculator.calculatePositionSize(10_000, 1, 2000, 1990, 2010, 'buy');
 
-      expect(result.quantityLots).toBe(1);
-      expect(result.riskAmount).toBe(100); // 10 pips × $1/pip × 1 lot
-      expect(result.rewardAmount).toBe(200); // 20 pips × $1/pip × 1 lot
-      expect(result.rewardRisk).toBe(2); // 200/100
+      expect(result.quantityLots).toBe(0.1);
+      expect(result.riskAmount).toBe(100); // 1000 pips × $1/pip × 0.1 lots
+      expect(result.rewardAmount).toBe(100); // 1000 pips × $1/pip × 0.1 lots
+      expect(result.rewardRisk).toBe(1); // 100/100
       expect(result.stopDistance).toBe(10);
-      expect(result.targetDistance).toBe(20);
+      expect(result.targetDistance).toBe(10);
       expect(result.pipValuePerLot).toBe(GOLD_PIP_VALUE);
       expect(result.notionalUSD).toBeGreaterThan(0);
     });

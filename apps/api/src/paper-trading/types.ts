@@ -11,6 +11,19 @@ import {
  * Paper Trading API request/response schemas
  */
 
+const riskDecisionSchema = z.object({
+  approved: z.boolean(),
+  code: z.string().nullable(),
+  reasons: z.array(z.string()),
+  warnings: z.array(z.string()),
+  riskAmount: z.number(),
+  riskPct: z.number(),
+  rewardRisk: z.number(),
+  notionalUSD: z.number(),
+  leverage: z.number(),
+  computedAt: isoDateSchema,
+});
+
 // ============================================================================
 // Risk Engine Endpoints
 // ============================================================================
@@ -31,9 +44,10 @@ export const positionSizeRequestSchema = z.object({
 export const positionSizeResponseSchema = z.object({
   quantity: z.number().nonnegative(),
   contracts: z.number().nonnegative(),
-  cost: positiveNumberSchema,
-  maxLoss: positiveNumberSchema,
+  cost: z.number().nonnegative(),
+  maxLoss: z.number().nonnegative(),
   leverage: nonNegativeNumberSchema,
+  riskPct: z.number(),
 });
 
 /**
@@ -47,22 +61,53 @@ export const validatePlanRequestSchema = z.object({
   stopPrice: positiveNumberSchema,
   targetPrice: positiveNumberSchema,
   quantity: positiveNumberSchema,
-  currentPositions: z.array(
-    z.object({
-      instrument: instrumentSymbolSchema,
-      side: sideSchema,
-      quantity: positiveNumberSchema,
-      entryPrice: positiveNumberSchema,
-    }),
-  ),
-  dailyLossUSD: z.number(),
+  currentPositions: z
+    .array(
+      z.object({
+        instrument: instrumentSymbolSchema,
+        side: sideSchema,
+        quantity: positiveNumberSchema,
+        entryPrice: positiveNumberSchema,
+        stopPrice: positiveNumberSchema.optional(),
+      }),
+    )
+    .default([]),
+  openOrders: z
+    .array(
+      z.object({
+        instrument: instrumentSymbolSchema,
+        side: sideSchema,
+        quantity: positiveNumberSchema,
+        entryPrice: positiveNumberSchema,
+        stopPrice: positiveNumberSchema.optional(),
+        targetPrice: positiveNumberSchema.optional(),
+        createdAt: isoDateSchema.optional(),
+      }),
+    )
+    .default([]),
+  dailyLossUSD: z.number().default(0),
+  accountBalance: positiveNumberSchema.optional(),
 });
 
 export const validatePlanResponseSchema = z.object({
   valid: z.boolean(),
   reason: z.string(),
+  code: z.string().nullable().optional(),
   violations: z.array(z.string()),
   suggestions: z.array(z.string()),
+  checks: z
+    .array(
+      z.object({
+        id: z.string(),
+        ok: z.boolean(),
+        detail: z.string(),
+      }),
+    )
+    .optional(),
+  riskAmount: z.number().optional(),
+  riskPct: z.number().optional(),
+  rewardRisk: z.number().optional(),
+  leverage: z.number().optional(),
 });
 
 /**
@@ -76,6 +121,26 @@ export const risksLimitsResponseSchema = z.object({
   maxPositions: z.number().int().positive(),
   minRR: positiveNumberSchema,
   correlationThreshold: z.number().min(0).max(1),
+  maxLeverage: z.number().positive().optional(),
+  eventBlackoutMinutes: z.number().int().nonnegative().optional(),
+  killSwitchEnabled: z.boolean().optional(),
+  killSwitchReason: z.string().nullable().optional(),
+  commissionPerLot: z.number().nonnegative().optional(),
+  slippagePips: z.number().nonnegative().optional(),
+});
+
+/**
+ * GET/POST /api/v1/risk/kill-switch
+ */
+export const killSwitchStateSchema = z.object({
+  enabled: z.boolean(),
+  reason: z.string().max(500).optional().default(''),
+  updatedAt: isoDateSchema.nullable().optional(),
+});
+
+export const killSwitchRequestSchema = z.object({
+  enabled: z.boolean(),
+  reason: z.string().max(500).optional(),
 });
 
 /**
@@ -96,6 +161,14 @@ export const correlateRequestSchema = z.object({
 export const correlateResponseSchema = z.object({
   correlation: z.number().min(-1).max(1),
   risk: z.enum(['low', 'medium', 'high']),
+  pairs: z
+    .array(
+      z.object({
+        instrument: instrumentSymbolSchema,
+        correlation: z.number(),
+      }),
+    )
+    .optional(),
 });
 
 /**
@@ -107,6 +180,9 @@ export const exposureResponseSchema = z.object({
   dailyLoss: z.number(),
   openPositions: z.number().int().nonnegative(),
   dailyTrades: z.number().int().nonnegative(),
+  maxOpenRisk: nonNegativeNumberSchema.optional(),
+  riskUtilisationPct: z.number().optional(),
+  killSwitchEnabled: z.boolean().optional(),
 });
 
 // ============================================================================
@@ -118,20 +194,26 @@ export const exposureResponseSchema = z.object({
  * Create a new paper order
  */
 export const createPaperOrderRequestSchema = z.object({
+  idempotencyKey: z.string().min(8).max(128),
   instrument: instrumentSymbolSchema,
   side: sideSchema,
+  type: z.enum(['market', 'limit']).default('market'),
   entryPrice: positiveNumberSchema,
   stopPrice: positiveNumberSchema,
   targetPrice: positiveNumberSchema,
-  quantity: positiveNumberSchema,
+  quantity: positiveNumberSchema.optional(),
+  riskPct: z.number().positive().max(100).optional(),
+  limitPrice: positiveNumberSchema.optional(),
   notes: z.string().max(500).optional(),
 });
 
 export const paperOrderSchema = z.object({
   orderId: z.string().min(1),
-  status: z.enum(['pending', 'filled', 'closed', 'cancelled']),
+  idempotencyKey: z.string().optional(),
+  status: z.enum(['pending', 'filled', 'closed', 'cancelled', 'rejected']),
   instrument: instrumentSymbolSchema,
   side: sideSchema,
+  type: z.enum(['market', 'limit']).optional(),
   entryPrice: positiveNumberSchema,
   stopPrice: positiveNumberSchema,
   targetPrice: positiveNumberSchema,
@@ -142,6 +224,9 @@ export const paperOrderSchema = z.object({
   closedAt: isoDateSchema.nullable(),
   closePrice: positiveNumberSchema.nullable(),
   notes: z.string().max(500),
+  commission: z.number().nonnegative().optional(),
+  slippage: z.number().nonnegative().optional(),
+  riskDecision: riskDecisionSchema.nullable().optional(),
 });
 
 /**
@@ -149,8 +234,9 @@ export const paperOrderSchema = z.object({
  * List paper orders with optional filters
  */
 export const listPaperOrdersQuerySchema = z.object({
-  status: z.enum(['pending', 'filled', 'closed', 'cancelled']).optional(),
+  status: z.enum(['pending', 'filled', 'closed', 'cancelled', 'rejected']).optional(),
   instrument: instrumentSymbolSchema.optional(),
+  limit: z.coerce.number().int().min(1).max(200).optional().default(100),
 });
 
 export const listPaperOrdersResponseSchema = z.object({
@@ -190,8 +276,11 @@ export const fillPaperOrderRequestSchema = z.object({
 export const fillPaperOrderResponseSchema = z.object({
   filled: z.boolean(),
   fillPrice: positiveNumberSchema,
-  cost: positiveNumberSchema,
+  cost: nonNegativeNumberSchema,
+  commission: nonNegativeNumberSchema.optional(),
+  slippage: nonNegativeNumberSchema.optional(),
   orderId: z.string().min(1),
+  positionId: z.string().optional(),
 });
 
 /**
@@ -200,13 +289,20 @@ export const fillPaperOrderResponseSchema = z.object({
  */
 export const paperPositionSchema = z.object({
   id: z.string().min(1),
+  positionId: z.string().optional(),
+  orderId: z.string().optional(),
   instrument: instrumentSymbolSchema,
   side: sideSchema,
   quantity: positiveNumberSchema,
   entryPrice: positiveNumberSchema,
   currentPrice: positiveNumberSchema,
+  stopPrice: positiveNumberSchema.optional(),
+  targetPrice: positiveNumberSchema.optional(),
   unrealizedPnL: z.number(),
   unrealizedPnLPct: z.number(),
+  riskAmount: z.number().optional(),
+  openedAt: isoDateSchema.optional(),
+  status: z.string().optional(),
 });
 
 export const listPaperPositionsResponseSchema = z.object({
@@ -219,15 +315,47 @@ export const listPaperPositionsResponseSchema = z.object({
  * Close an open position
  */
 export const closePaperPositionRequestSchema = z.object({
-  closePrice: positiveNumberSchema,
-  reason: z.enum(['manual', 'stop', 'target']),
+  closePrice: positiveNumberSchema.optional(),
+  reason: z.enum(['manual', 'stop', 'target']).default('manual'),
 });
 
 export const closePaperPositionResponseSchema = z.object({
   closed: z.boolean(),
   realizedPnL: z.number(),
+  grossPnL: z.number().optional(),
+  costs: z.number().optional(),
   rMultiple: z.number().nullable(),
   positionId: z.string().min(1),
+  tradeId: z.string().optional(),
+});
+
+/**
+ * POST /api/v1/paper/evaluate
+ * Evaluate open positions against current quotes and close on stop/target.
+ */
+export const evaluatePositionsRequestSchema = z.object({
+  quotes: z
+    .array(
+      z.object({
+        instrument: instrumentSymbolSchema,
+        bid: positiveNumberSchema,
+        ask: positiveNumberSchema,
+      }),
+    )
+    .default([]),
+});
+
+export const evaluatePositionsResponseSchema = z.object({
+  evaluated: z.number().int().nonnegative(),
+  closed: z.array(
+    z.object({
+      positionId: z.string(),
+      instrument: instrumentSymbolSchema,
+      reason: z.enum(['stop', 'target']),
+      exitPrice: positiveNumberSchema,
+      realizedPnL: z.number(),
+    }),
+  ),
 });
 
 /**
@@ -235,22 +363,28 @@ export const closePaperPositionResponseSchema = z.object({
  * Get closed trades with pagination
  */
 export const listPaperTradesQuerySchema = z.object({
-  limit: z.number().int().min(1).max(100).optional().default(20),
-  offset: z.number().int().nonnegative().optional().default(0),
+  limit: z.coerce.number().int().min(1).max(100).optional().default(20),
+  offset: z.coerce.number().int().nonnegative().optional().default(0),
   instrument: instrumentSymbolSchema.optional(),
 });
 
 export const paperTradeSchema = z.object({
   id: z.string().min(1),
+  tradeId: z.string().optional(),
+  orderId: z.string().optional(),
   instrument: instrumentSymbolSchema,
   side: sideSchema,
   entryPrice: positiveNumberSchema,
   exitPrice: positiveNumberSchema,
   quantity: positiveNumberSchema,
+  grossPnL: z.number().optional(),
+  costs: z.number().optional(),
   realizedPnL: z.number(),
+  pnLPct: z.number().optional(),
   rMultiple: z.number().nullable(),
   createdAt: isoDateSchema,
   closedAt: isoDateSchema,
+  closeReason: z.enum(['stop', 'target', 'manual']).optional(),
   notes: z.string().max(500),
 });
 
@@ -278,11 +412,15 @@ export const paperAnalyticsResponseSchema = z.object({
   openTrades: z.number().int().nonnegative(),
   closedTrades: z.number().int().nonnegative(),
   winRate: z.number().min(0).max(100),
-  profitFactor: nonNegativeNumberSchema,
+  profitFactor: nonNegativeNumberSchema.nullable(),
   expectancy: z.number(),
   maxDD: z.number(),
   totalRealizedPnL: z.number(),
-  accountBalance: positiveNumberSchema,
+  accountBalance: z.number(),
+  averageR: z.number().nullable().optional(),
+  totalR: z.number().nullable().optional(),
+  averageWin: z.number().optional(),
+  averageLoss: z.number().optional(),
 });
 
 /**
@@ -291,11 +429,14 @@ export const paperAnalyticsResponseSchema = z.object({
  */
 export const accountSnapshotResponseSchema = z.object({
   startingBalance: positiveNumberSchema,
-  currentBalance: positiveNumberSchema,
+  currentBalance: z.number(),
   realizedPnL: z.number(),
   unrealizedPnL: z.number(),
   totalPnL: z.number(),
   accountPnLPct: z.number(),
+  openPositions: z.number().int().nonnegative().optional(),
+  openOrders: z.number().int().nonnegative().optional(),
+  dailyPnL: z.number().optional(),
 });
 
 /**
@@ -317,6 +458,7 @@ export type PositionSizeResponse = z.infer<typeof positionSizeResponseSchema>;
 export type ValidatePlanRequest = z.infer<typeof validatePlanRequestSchema>;
 export type ValidatePlanResponse = z.infer<typeof validatePlanResponseSchema>;
 export type RiskLimitsResponse = z.infer<typeof risksLimitsResponseSchema>;
+export type KillSwitchState = z.infer<typeof killSwitchStateSchema>;
 export type CorrelateRequest = z.infer<typeof correlateRequestSchema>;
 export type CorrelateResponse = z.infer<typeof correlateResponseSchema>;
 export type ExposureResponse = z.infer<typeof exposureResponseSchema>;
@@ -334,6 +476,8 @@ export type PaperPosition = z.infer<typeof paperPositionSchema>;
 export type ListPaperPositionsResponse = z.infer<typeof listPaperPositionsResponseSchema>;
 export type ClosePaperPositionRequest = z.infer<typeof closePaperPositionRequestSchema>;
 export type ClosePaperPositionResponse = z.infer<typeof closePaperPositionResponseSchema>;
+export type EvaluatePositionsRequest = z.infer<typeof evaluatePositionsRequestSchema>;
+export type EvaluatePositionsResponse = z.infer<typeof evaluatePositionsResponseSchema>;
 
 export type ListPaperTradesQuery = z.infer<typeof listPaperTradesQuerySchema>;
 export type PaperTrade = z.infer<typeof paperTradeSchema>;

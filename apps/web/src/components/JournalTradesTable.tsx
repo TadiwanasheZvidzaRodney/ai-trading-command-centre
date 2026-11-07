@@ -113,7 +113,7 @@ export function JournalTradesTable({
                   <td className="mono">${trade.entryPrice.toFixed(2)}</td>
                   <td className="mono">${trade.exitPrice.toFixed(2)}</td>
                   <td>{trade.quantity.toFixed(4)}</td>
-                  <td className="table-note">{trade.duration}</td>
+                  <td className="table-note">{trade.duration ?? '—'}</td>
                   <td>
                     <strong className={trade.realizedPnL >= 0 ? 'positive' : 'negative'}>
                       {trade.realizedPnL >= 0 ? '+' : '-'}$
@@ -122,22 +122,25 @@ export function JournalTradesTable({
                       })}
                     </strong>
                   </td>
-                  <td className={trade.realizedPnLPct >= 0 ? 'positive' : 'negative'}>
-                    {trade.realizedPnLPct >= 0 ? '+' : ''}
-                    {trade.realizedPnLPct.toFixed(2)}%
+                  <td className={(trade.realizedPnLPct ?? 0) >= 0 ? 'positive' : 'negative'}>
+                    {(trade.realizedPnLPct ?? 0) >= 0 ? '+' : ''}
+                    {(trade.realizedPnLPct ?? 0).toFixed(2)}%
                   </td>
                   <td>
                     <span
                       className={`badge ${
-                        trade.rMultiple > 0
-                          ? 'ok'
-                          : trade.rMultiple > -0.5
-                            ? 'warn'
-                            : 'error'
+                        trade.rMultiple === null
+                          ? 'info'
+                          : trade.rMultiple > 0
+                            ? 'ok'
+                            : trade.rMultiple > -0.5
+                              ? 'warn'
+                              : 'error'
                       }`}
                     >
-                      {trade.rMultiple >= 0 ? '+' : ''}
-                      {trade.rMultiple.toFixed(2)}R
+                      {trade.rMultiple === null
+                        ? '—'
+                        : `${trade.rMultiple >= 0 ? '+' : ''}${trade.rMultiple.toFixed(2)}R`}
                     </span>
                   </td>
                   <td>

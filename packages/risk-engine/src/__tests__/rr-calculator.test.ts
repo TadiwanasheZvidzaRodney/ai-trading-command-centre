@@ -21,7 +21,7 @@ describe('RewardRiskCalculator', () => {
     });
 
     it('should handle various R:R ratios', () => {
-      const ratios = [
+      const ratios: Array<[number, number, number, number]> = [
         [1.0500, 1.0400, 1.0550, 0.5], // 50 pips / 100 pips
         [1.0500, 1.0400, 1.0600, 1], // 100 pips / 100 pips
         [1.0500, 1.0400, 1.0800, 3], // 300 pips / 100 pips
@@ -131,7 +131,7 @@ describe('RewardRiskCalculator', () => {
         calculator.validate(1.0500, 1.0400, 1.0650),
       );
 
-      expect(validations.every((v) => v.valid === validations[0].valid)).toBe(true);
+      expect(validations.every((v) => v.valid === validations[0]!.valid)).toBe(true);
     });
   });
 

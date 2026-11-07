@@ -238,8 +238,8 @@ describe('PaperTradingEngine', () => {
 
       const positions = engine.getOpenPositions();
       expect(positions.length).toBe(1);
-      expect(positions[0].side).toBe('buy');
-      expect(positions[0].entryPrice).toBe(1.0501);
+      expect(positions[0]!.side).toBe('buy');
+      expect(positions[0]!.entryPrice).toBe(1.0501);
     });
 
     it('should update position prices', () => {
@@ -255,11 +255,11 @@ describe('PaperTradingEngine', () => {
 
       const exec = engine.executeOrder(order.id, 1.0500, 1.0501, new Date().toISOString());
       const positions = engine.getOpenPositions();
-      const positionId = positions[0].id;
+      const positionId = positions[0]!.id;
 
-      const updated = engine.updatePosition(positionId, 1.0550);
+      const updated = engine.updatePosition(positionId, 1.0600);
 
-      expect(updated?.currentPrice).toBe(1.0550);
+      expect(updated?.currentPrice).toBe(1.0600);
       expect(updated?.unrealizedPnL).toBeGreaterThan(0);
     });
   });
@@ -279,7 +279,7 @@ describe('PaperTradingEngine', () => {
       engine.executeOrder(order.id, 1.0500, 1.0501, new Date().toISOString());
       const positions = engine.getOpenPositions();
 
-      const result = engine.checkClosureTriggers(positions[0].id, 1.0390, 1.0395);
+      const result = engine.checkClosureTriggers(positions[0]!.id, 1.0390, 1.0395);
 
       expect(result.shouldClose).toBe(true);
       expect(result.reason).toBe('stop');
@@ -299,7 +299,7 @@ describe('PaperTradingEngine', () => {
       engine.executeOrder(order.id, 1.0500, 1.0501, new Date().toISOString());
       const positions = engine.getOpenPositions();
 
-      const result = engine.checkClosureTriggers(positions[0].id, 1.0650, 1.0660);
+      const result = engine.checkClosureTriggers(positions[0]!.id, 1.0650, 1.0660);
 
       expect(result.shouldClose).toBe(true);
       expect(result.reason).toBe('target');

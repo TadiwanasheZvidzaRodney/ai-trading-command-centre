@@ -1,5 +1,10 @@
 import Decimal from 'decimal.js';
 
+function pricePrecision(pipSize: number): number {
+  const precision = Math.ceil(-Math.log10(pipSize));
+  return Math.min(10, Math.max(0, precision));
+}
+
 /**
  * Validate reward-to-risk ratio.
  * 
@@ -74,7 +79,10 @@ export class RewardRiskCalculator {
     const targetDistance = new Decimal(stopDistance).times(targetRR);
     const minTarget = new Decimal(entry).plus(targetDistance);
 
-    return Number(minTarget.toFixed(2));
+    // Round to the instrument's price precision instead of a fixed 2 decimals.
+    // pipSize 0.0001 -> 4 decimals; pipSize 0.1 -> 1 decimal.
+    const precision = pricePrecision(this.pipSize);
+    return Number(minTarget.toFixed(precision));
   }
 
   /**
@@ -102,13 +110,18 @@ export class RewardRiskCalculator {
     const stopDistance = Math.abs(entry - stop);
     const minTargetDistance = new Decimal(stopDistance).times(this.minRewardRisk);
     const adjustedTarget = new Decimal(entry).plus(minTargetDistance);
+    const precision = pricePrecision(this.pipSize);
+    const adjustedTargetText = Number(adjustedTarget.toFixed(precision));
+    const differenceText = Number(
+      adjustedTarget.minus(target).abs().toFixed(precision),
+    );
 
     return {
       currentRatio: current,
       needed: 'moveTarget',
       suggestions: [
         `Current R:R is ${current}, need at least ${this.minRewardRisk}`,
-        `Move target from ${target} to at least ${Number(adjustedTarget.toFixed(2))} (difference: ${Number(adjustedTarget.minus(target).abs().toFixed(2))} pips)`,
+        `Move target from ${target} to at least ${adjustedTargetText} (difference: ${differenceText} pips)`,
       ],
     };
   }

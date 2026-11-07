@@ -43,7 +43,7 @@ export class PaperTradingEngine {
     this.positionTracker = new PositionTracker();
     this.orderExecutor = new OrderExecutor(riskConfig, pipSize);
     this.pnlCalculator = new PnLCalculator();
-    this.dailyResetAt = new Date().toISOString().split('T')[0];
+    this.dailyResetAt = new Date().toISOString().slice(0, 10);
   }
 
   /**
@@ -223,7 +223,7 @@ export class PaperTradingEngine {
     const totalPnLPct = (totalPnL / this.startingBalance) * 100;
 
     // Calculate daily P&L
-    const today = timestamp.split('T')[0];
+    const today = timestamp.slice(0, 10);
     const dailyTrades = this.positionTracker.getClosedTradesForDate(today);
     const dailyRealizedPnL = dailyTrades.reduce((sum, t) => sum + t.netPnL, 0);
     const dailyPnL = new Decimal(dailyRealizedPnL).plus(unrealizedPnL).toNumber();

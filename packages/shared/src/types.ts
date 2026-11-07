@@ -298,6 +298,8 @@ export interface RiskConfig {
   maxSpreadPips: Record<InstrumentSymbol, number>;
   eventBlackoutMinutes: number;
   killSwitch: boolean;
+  /** Maximum notional exposure as a multiple of account equity. */
+  maxLeverage?: number;
 }
 
 export interface PositionSizeInput {

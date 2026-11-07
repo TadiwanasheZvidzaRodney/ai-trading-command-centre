@@ -26,8 +26,8 @@ describe('PnLCalculator', () => {
     });
 
     it('should scale P&L with quantity', () => {
-      const pnl1 = calculator.calculateUnrealizedPnL('buy', 1.0500, 1.0550, 1);
-      const pnl2 = calculator.calculateUnrealizedPnL('buy', 1.0500, 1.0550, 2);
+      const pnl1 = calculator.calculateUnrealizedPnL('buy', 1.0500, 1.0600, 1);
+      const pnl2 = calculator.calculateUnrealizedPnL('buy', 1.0500, 1.0600, 2);
 
       expect(pnl2).toBe(pnl1 * 2);
     });
@@ -111,7 +111,7 @@ describe('PnLCalculator', () => {
       );
 
       expect(rMultiple).not.toBeNull();
-      expect(rMultiple! * 100).toBeGreaterThan(0); // Loss of 50 pips / 100 pips risk = -0.5R
+      expect(rMultiple!).toBeLessThan(0); // Loss of 50 pips / 100 pips risk = -0.5R
     });
 
     it('should return null when stop equals entry', () => {

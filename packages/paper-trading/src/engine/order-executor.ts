@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import Decimal from 'decimal.js';
 import type { OrderSide, RiskConfig } from '@atc/shared';
 import type { PaperOrder, PaperOrderInput, OrderExecutionResult, FillResult } from '../types.js';
@@ -27,7 +27,7 @@ export class OrderExecutor {
    */
   submitOrder(input: PaperOrderInput): PaperOrder {
     return {
-      id: uuidv4(),
+      id: randomUUID(),
       idempotencyKey: input.idempotencyKey,
       instrument: input.instrument,
       side: input.side,
@@ -77,7 +77,7 @@ export class OrderExecutor {
     // Calculate costs
     const spread = Math.abs(ask - bid);
     const slippagePips = this.slippagePips;
-    const slippagePrice = new Decimal(slippagePips).times(this.pipSize[order.instrument]);
+    const slippagePrice = new Decimal(slippagePips).times((this.pipSize[order.instrument] ?? 0.0001));
     const slippage = Number(slippagePrice.toFixed(4));
 
     const commission = new Decimal(order.quantityLots).times(this.commissionPerLot);

@@ -12,6 +12,7 @@ const alias = {
   '@atc/ai-copilot': path.resolve(root, 'packages/ai-copilot/src/index.ts'),
   '@atc/ai-engine': path.resolve(root, 'packages/ai-engine/src/index.ts'),
   '@atc/risk-engine': path.resolve(root, 'packages/risk-engine/src/index.ts'),
+  '@atc/backtesting': path.resolve(root, 'packages/backtesting/src/index.ts'),
   '@atc/trading-domain': path.resolve(root, 'packages/trading-domain/src/index.ts'),
 };
 

@@ -1,12 +1,16 @@
 'use client';
 
 import type {
+  BacktestConfig,
+  BacktestTrade,
   CalendarFeed,
   CandleSeries,
+  EquityPoint,
   Impact,
   Instrument,
   InstrumentSymbol,
   NewsFeed,
+  PerformanceMetrics,
   ProviderHealth,
   ProviderInfo,
   Quote,
@@ -403,6 +407,9 @@ export function useCopilotHistory(
   }, [instrument, timeframe, limit]);
 
   useEffect(() => {
+    // Kick off an async load when the query inputs change. The state updates
+    // happen after the request settles, not during render.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     void fetch();
   }, [instrument, timeframe, fetch]);
 
@@ -418,31 +425,43 @@ export interface PaperAccountResponse {
   unrealizedPnL: number;
   totalPnL: number;
   accountPnLPct: number;
+  openPositions?: number;
+  openOrders?: number;
+  dailyPnL?: number;
   timestamp: string;
 }
 
 export interface PaperOrder {
   id: string;
+  orderId?: string;
   instrument: InstrumentSymbol;
   side: 'buy' | 'sell';
+  type?: 'market' | 'limit';
   quantity: number;
   entryPrice: number;
   stopPrice: number;
   targetPrice: number;
-  status: 'pending' | 'filled' | 'cancelled';
+  status: 'pending' | 'filled' | 'closed' | 'cancelled' | 'rejected';
   notes?: string;
   createdAt: string;
-  filledAt?: string;
+  filledAt?: string | null;
+  filledPrice?: number | null;
+  commission?: number;
+  slippage?: number;
 }
 
 export interface PaperPosition {
   id: string;
+  positionId?: string;
   orderId: string;
   instrument: InstrumentSymbol;
   side: 'buy' | 'sell';
   quantity: number;
   entryPrice: number;
   currentPrice: number;
+  stopPrice?: number;
+  targetPrice?: number;
+  riskAmount?: number;
   unrealizedPnL: number;
   unrealizedPnLPct: number;
   openedAt: string;
@@ -450,17 +469,22 @@ export interface PaperPosition {
 
 export interface PaperTrade {
   id: string;
+  tradeId?: string;
   instrument: InstrumentSymbol;
   side: 'buy' | 'sell';
   quantity: number;
   entryPrice: number;
   exitPrice: number;
+  grossPnL?: number;
+  costs?: number;
   realizedPnL: number;
-  realizedPnLPct: number;
-  rMultiple: number;
-  duration: string;
+  realizedPnLPct?: number;
+  rMultiple: number | null;
+  duration?: string;
+  closeReason?: 'stop' | 'target' | 'manual';
   notes?: string;
-  openedAt: string;
+  openedAt?: string;
+  createdAt?: string;
   closedAt: string;
 }
 
@@ -484,6 +508,18 @@ export interface RiskLimitsResponse {
   maxPositions: number;
   minRR: number;
   correlationThreshold: number;
+  maxLeverage?: number;
+  eventBlackoutMinutes?: number;
+  commissionPerLot?: number;
+  slippagePips?: number;
+  killSwitchEnabled?: boolean;
+  killSwitchReason?: string | null;
+}
+
+export interface KillSwitchState {
+  enabled: boolean;
+  reason?: string;
+  updatedAt?: string | null;
 }
 
 export function usePaperAccount() {
@@ -525,4 +561,94 @@ export function usePaperAnalytics() {
 
 export function useRiskLimits() {
   return useApi<RiskLimitsResponse>('/api/v1/risk/limits', { refreshInterval: 300_000 });
+}
+
+export function useKillSwitch() {
+  return useApi<KillSwitchState>('/api/v1/risk/kill-switch', { refreshInterval: 10_000 });
+}
+
+/* ---------- Backtesting ---------- */
+
+export type BacktestSplitName = 'development' | 'validation' | 'outOfSample';
+
+export type BacktestVerdict =
+  | 'insufficient-evidence'
+  | 'out-of-sample-profitable'
+  | 'out-of-sample-not-profitable';
+
+export interface BacktestStrategySummary {
+  id: string;
+  name: string;
+  description: string;
+  warmupBars: number;
+}
+
+export interface BacktestSplitMetrics {
+  development: PerformanceMetrics;
+  validation: PerformanceMetrics;
+  outOfSample: PerformanceMetrics;
+}
+
+export interface BacktestRunSummary {
+  runId: string;
+  id: string;
+  createdAt: string;
+  inputHash: string;
+  config: BacktestConfig;
+  strategy: { id: string; name: string };
+  metrics: PerformanceMetrics;
+  verdict: BacktestVerdict;
+  candleCount: number;
+}
+
+export interface BacktestRunDetail extends BacktestRunSummary {
+  trades: BacktestTrade[];
+  equityCurve: EquityPoint[];
+  warnings: string[];
+  split: {
+    development: { from: string; to: string };
+    validation: { from: string; to: string };
+    outOfSample: { from: string; to: string };
+  };
+  splitMetrics: BacktestSplitMetrics;
+}
+
+export interface BacktestRunRequest {
+  instrument: InstrumentSymbol;
+  timeframe: Timeframe;
+  from: string;
+  to: string;
+  strategyId: string;
+  initialEquity: number;
+  riskPerTradePct: number;
+  spreadPips: number;
+  commissionPerLot: number;
+  slippagePips: number;
+  maxHoldBars: number;
+}
+
+export interface BacktestRunResponse {
+  status: 'ok';
+  data: BacktestRunDetail;
+  timestamp: string;
+}
+
+export function useBacktestStrategies() {
+  return useApi<{ strategies: BacktestStrategySummary[] }>(
+    '/api/v1/backtests/strategies',
+    { refreshInterval: 300_000 },
+  );
+}
+
+export function useBacktestRuns(limit = 20) {
+  return useApi<{ runs: BacktestRunSummary[]; total: number }>(
+    `/api/v1/backtests?limit=${limit}`,
+    { refreshInterval: 30_000 },
+  );
+}
+
+export function useBacktestRun(runId: string | null) {
+  return useApi<BacktestRunDetail>(
+    runId ? `/api/v1/backtests/${encodeURIComponent(runId)}` : null,
+  );
 }

@@ -5,7 +5,7 @@ import { AlertTriangle, Zap } from 'lucide-react';
 
 function parseMarkdown(md: string): string {
   // Simple markdown to HTML converter - safe for display
-  let html = md
+  const html = md
     // Escape HTML
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -18,7 +18,7 @@ function parseMarkdown(md: string): string {
     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
     .replace(/\*(.*?)\*/g, '<em>$1</em>')
     // Lists (basic)
-    .replace(/^\- (.*?)$/gm, '<li>$1</li>')
+    .replace(/^- (.*?)$/gm, '<li>$1</li>')
     // Wrap consecutive list items
     .replace(/(<li>.*?<\/li>)/s, '<ul>$1</ul>')
     // Code blocks

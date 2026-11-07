@@ -15,6 +15,7 @@ import Fastify, {
 import { randomUUID } from 'node:crypto';
 import { ZodError } from 'zod';
 import { registerAuth } from './auth/plugin.js';
+import { registerBacktestRoutes } from './backtesting/routes.js';
 import { registerAuthRoutes } from './auth/routes.js';
 import type { DatabaseLike } from './db/mongo.js';
 import { AppError, zodDetails } from './errors.js';
@@ -33,6 +34,8 @@ import { MongoTaskStore, type TaskStore } from './tasks/repository.js';
 import { registerTaskRoutes } from './tasks/routes.js';
 import { registerCopilotRoutes, type AIAnalysisService } from './copilot/routes.js';
 import { registerPaperTradingRoutes } from './paper-trading/routes.js';
+import { PaperTradingService } from './paper-trading/service.js';
+import { startPaperTradingScheduler } from './paper-trading/scheduler.js';
 
 const VERSION = '0.1.0';
 
@@ -218,7 +221,43 @@ export async function buildServer(options: BuildServerOptions): Promise<FastifyI
   await registerTaskRoutes(app, { store: taskStore });
   await registerIntelligenceRoutes(app, { news, calendar });
   if (db.db) {
-    await registerPaperTradingRoutes(app, { db: db.db, env });
+    await registerBacktestRoutes(app, { db: db.db, marketData });
+    const paperTrading = new PaperTradingService({
+      db: db.db,
+      env,
+      marketData,
+      calendar,
+      logger: {
+        info: (context, message) => app.log.info(context, message),
+        warn: (context, message) => app.log.warn(context, message),
+        error: (context, message) => app.log.error(context, message),
+      },
+    });
+    await registerPaperTradingRoutes(app, {
+      db: db.db,
+      env,
+      marketData,
+      calendar,
+      service: paperTrading,
+      logger: {
+        warn: (context, message) => app.log.warn(context, message),
+        error: (context, message) => app.log.error(context, message),
+      },
+    });
+    if (env.ENABLE_SCHEDULER) {
+      const stopScheduler = startPaperTradingScheduler({
+        service: paperTrading,
+        intervalSeconds: env.PAPER_EVAL_INTERVAL_SECONDS,
+        logger: {
+          info: (context, message) => app.log.info(context, message),
+          warn: (context, message) => app.log.warn(context, message),
+          error: (context, message) => app.log.error(context, message),
+        },
+      });
+      app.addHook('onClose', async () => {
+        stopScheduler();
+      });
+    }
   }
   if (options.aiAnalysis) {
     await registerCopilotRoutes(app, { aiAnalysis: options.aiAnalysis });

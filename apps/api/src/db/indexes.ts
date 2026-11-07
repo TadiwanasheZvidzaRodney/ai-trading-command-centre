@@ -22,7 +22,10 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection('calendar_events').createIndex({ scheduledAt: 1 }),
     db.collection('analyses').createIndex({ instrument: 1, createdAt: -1 }),
     db.collection('setups').createIndex({ instrument: 1, status: 1 }),
-    db.collection('paper_orders').createIndex({ idempotencyKey: 1 }, { unique: true }),
+    db.collection('paper_orders').createIndex(
+      { idempotencyKey: 1 },
+      { unique: true, partialFilterExpression: { idempotencyKey: { $type: 'string' } } },
+    ),
     db.collection('paper_orders').createIndex({ status: 1, instrument: 1 }),
     db.collection('paper_orders').createIndex({ createdAt: -1 }),
     db.collection('paper_positions').createIndex({ status: 1, instrument: 1 }),
@@ -35,5 +38,7 @@ export async function ensureIndexes(db: Db): Promise<void> {
     db.collection('provider_health').createIndex({ providerId: 1 }, { unique: true }),
     db.collection('settings').createIndex({ key: 1 }, { unique: true }),
     db.collection('backtest_runs').createIndex({ createdAt: -1 }),
+    db.collection('backtest_runs').createIndex({ runId: 1 }, { unique: true }),
+    db.collection('backtest_runs').createIndex({ inputHash: 1 }),
   ]);
 }

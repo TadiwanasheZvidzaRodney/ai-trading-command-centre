@@ -113,6 +113,13 @@ export async function registerAuthRoutes(
     }
     reply.clearCookie(SESSION_COOKIE, { path: '/' });
     reply.clearCookie(CSRF_COOKIE, { path: '/' });
+    await writeAudit(db.db, {
+      action: 'auth.logout',
+      actor: request.auth?.user.username ?? 'anonymous',
+      ip: request.ip,
+      userAgent: request.headers['user-agent'] ?? '',
+      requestId: request.id,
+    });
     return { ok: true };
   });
 }

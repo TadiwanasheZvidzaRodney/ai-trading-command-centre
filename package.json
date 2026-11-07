@@ -30,6 +30,7 @@
     "db:down": "docker compose down",
     "db:logs": "docker compose logs -f mongo",
     "auth:hash": "tsx scripts/hash-password.ts",
+    "drill:backup": "tsx scripts/backup-restore-drill.ts --drill",
     "deploy": "tsx scripts/deploy.ts",
     "seed": "tsx scripts/seed.ts",
     "check": "npm run lint && npm run typecheck && npm run test && npm run build"

@@ -25,6 +25,7 @@
       "@atc/ai-copilot": ["packages/ai-copilot/src/index.ts"],
       "@atc/ai-engine": ["packages/ai-engine/src/index.ts"],
       "@atc/risk-engine": ["packages/risk-engine/src/index.ts"],
+    "@atc/backtesting": ["packages/backtesting/src/index.ts"],
       "@atc/trading-domain": ["packages/trading-domain/src/index.ts"]
     }
   },

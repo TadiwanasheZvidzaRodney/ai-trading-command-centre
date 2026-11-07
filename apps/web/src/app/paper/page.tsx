@@ -1,22 +1,78 @@
 'use client';
 
-import { AlertTriangle, RefreshCw } from 'lucide-react';
-import { useCallback } from 'react';
+import { AlertTriangle, RefreshCw, ShieldAlert } from 'lucide-react';
+import { useState } from 'react';
+import { api } from '@/lib/api';
 import { EquityCurveChart } from '@/components/EquityCurveChart';
 import { OpenOrdersList } from '@/components/OpenOrdersList';
 import { OpenPositionsList } from '@/components/OpenPositionsList';
 import { OrderEntryForm } from '@/components/OrderEntryForm';
 import { PaperAccountHeader } from '@/components/PaperAccountHeader';
-import { usePaperAccount, usePaperOrders, usePaperPositions } from '@/lib/hooks';
+import {
+  useKillSwitch,
+  usePaperAccount,
+  usePaperOrders,
+  usePaperPositions,
+} from '@/lib/hooks';
 
 export default function PaperPage() {
   const account = usePaperAccount();
   const orders = usePaperOrders();
   const positions = usePaperPositions();
+  const killSwitch = useKillSwitch();
+  const [controlBusy, setControlBusy] = useState<'kill' | 'evaluate' | null>(null);
+  const [controlError, setControlError] = useState<string | null>(null);
+  const [controlMessage, setControlMessage] = useState<string | null>(null);
 
-  const handleRefresh = useCallback(async () => {
-    await Promise.all([account.mutate(), orders.mutate(), positions.mutate()]);
-  }, [account, orders, positions]);
+  const handleRefresh = async () => {
+    await Promise.all([
+      account.mutate(),
+      orders.mutate(),
+      positions.mutate(),
+      killSwitch.mutate(),
+    ]);
+  };
+
+  const handleToggleKillSwitch = async () => {
+    setControlBusy('kill');
+    setControlError(null);
+    setControlMessage(null);
+    try {
+      const next = !(killSwitch.data?.enabled ?? false);
+      await api.post('/api/v1/risk/kill-switch', {
+        enabled: next,
+        reason: next ? 'Paused from paper trading dashboard' : '',
+      });
+      setControlMessage(next ? 'Trading halted. New orders will be rejected.' : 'Trading resumed.');
+      await handleRefresh();
+    } catch (err) {
+      setControlError(err instanceof Error ? err.message : 'Failed to change kill switch');
+    } finally {
+      setControlBusy(null);
+    }
+  };
+
+  const handleEvaluate = async () => {
+    setControlBusy('evaluate');
+    setControlError(null);
+    setControlMessage(null);
+    try {
+      const result = await api.post<{ evaluated: number; closed: unknown[] }>(
+        '/api/v1/paper/evaluate',
+        {},
+      );
+      setControlMessage(
+        result.closed.length > 0
+          ? `Evaluated ${result.evaluated} position(s); ${result.closed.length} closed on stop/target.`
+          : `Evaluated ${result.evaluated} position(s); none hit a stop or target.`,
+      );
+      await handleRefresh();
+    } catch (err) {
+      setControlError(err instanceof Error ? err.message : 'Failed to evaluate positions');
+    } finally {
+      setControlBusy(null);
+    }
+  };
 
   const accountBalance = account.data?.currentBalance ?? 10000;
   const isLoading = account.isLoading || orders.isLoading || positions.isLoading;
@@ -48,13 +104,46 @@ export default function PaperPage() {
         </div>
       )}
 
-      <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', alignItems: 'flex-end' }}>
+      <div style={{ display: 'flex', gap: '12px', marginBottom: '14px', alignItems: 'flex-end', flexWrap: 'wrap' }}>
         <button type="button" className="btn btn-secondary" onClick={() => void handleRefresh()} disabled={isLoading}>
           <RefreshCw size={14} />
           Refresh
         </button>
+        <button
+          type="button"
+          className={`btn ${killSwitch.data?.enabled ? 'btn-danger' : 'btn-ghost'}`}
+          onClick={() => void handleToggleKillSwitch()}
+          disabled={controlBusy !== null}
+        >
+          <ShieldAlert size={14} />
+          {killSwitch.data?.enabled ? 'Resume trading' : 'Halt trading'}
+        </button>
+        <button
+          type="button"
+          className="btn btn-secondary"
+          onClick={() => void handleEvaluate()}
+          disabled={controlBusy !== null}
+        >
+          Evaluate stops &amp; targets
+        </button>
+        <span className="badge">
+          Kill switch: {killSwitch.data?.enabled ? 'ON' : 'off'}
+        </span>
         <span style={{ fontSize: '12px', color: 'var(--text-dim)' }}>Auto-refreshes every 10 seconds</span>
       </div>
+
+      {controlError && (
+        <div className="banner error">
+          <AlertTriangle size={16} />
+          <span>{controlError}</span>
+        </div>
+      )}
+
+      {controlMessage && (
+        <div className="banner info">
+          <span>{controlMessage}</span>
+        </div>
+      )}
 
       {/* Account Summary */}
       <PaperAccountHeader account={account.data ?? null} isLoading={account.isLoading} />

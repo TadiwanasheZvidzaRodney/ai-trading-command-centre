@@ -44,18 +44,19 @@ export function OrderEntryForm({ accountBalance, onOrderCreated }: OrderEntryFor
       const stop = parseFloat(form.stopPrice);
       const target = parseFloat(form.targetPrice);
 
-      const riskAmount = accountBalance * (form.riskPct / 100);
-      const riskPerUnit = Math.abs(entry - stop);
-      const quantity = riskAmount / riskPerUnit;
-
+      // The server derives the position size from riskPct and enforces every
+      // risk limit. Never send a client-calculated quantity that could bypass
+      // the server-side checks.
       await api.post('/api/v1/paper-orders', {
+        idempotencyKey: crypto.randomUUID(),
         instrument: form.instrument,
         side: form.side,
+        type: 'market',
         entryPrice: entry,
         stopPrice: stop,
         targetPrice: target,
-        quantity,
-        notes: `Quick order via paper trading dashboard`,
+        riskPct: form.riskPct,
+        notes: 'Quick order via paper trading dashboard',
       });
 
       setSuccess('Order created successfully!');

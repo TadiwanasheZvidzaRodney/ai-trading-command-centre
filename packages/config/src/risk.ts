@@ -17,5 +17,6 @@ export function riskConfigFromEnv(env: Env): RiskConfig {
     },
     eventBlackoutMinutes: 30,
     killSwitch: false,
+    maxLeverage: env.PAPER_MAX_LEVERAGE,
   };
 }

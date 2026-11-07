@@ -78,7 +78,7 @@ export function TradeNotesModal({ tradeId, trade, onClose, onSaved }: TradeNotes
               <h3 className="card-title">Trade Notes</h3>
               <span className="hint">
                 {trade.instrument} • {trade.side.toUpperCase()} •{' '}
-                {new Date(trade.openedAt).toLocaleDateString()}
+                {new Date(trade.openedAt ?? trade.createdAt ?? trade.closedAt).toLocaleDateString()}
               </span>
             </div>
             <button
@@ -128,11 +128,17 @@ export function TradeNotesModal({ tradeId, trade, onClose, onSaved }: TradeNotes
                     style={{
                       marginTop: '2px',
                       fontWeight: 600,
-                      color: trade.rMultiple >= 0 ? 'var(--positive)' : 'var(--negative)',
+                      color:
+                        trade.rMultiple === null
+                          ? 'var(--text-muted)'
+                          : trade.rMultiple >= 0
+                            ? 'var(--positive)'
+                            : 'var(--negative)',
                     }}
                   >
-                    {trade.rMultiple >= 0 ? '+' : ''}
-                    {trade.rMultiple.toFixed(2)}R
+                    {trade.rMultiple === null
+                      ? '—'
+                      : `${trade.rMultiple >= 0 ? '+' : ''}${trade.rMultiple.toFixed(2)}R`}
                   </div>
                 </div>
               </div>

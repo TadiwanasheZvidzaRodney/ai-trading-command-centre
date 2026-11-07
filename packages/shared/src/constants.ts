@@ -119,6 +119,7 @@ export const DEFAULT_RISK_CONFIG = {
   },
   eventBlackoutMinutes: 30,
   killSwitch: false,
+  maxLeverage: 30,
 };
 
 export function getInstrument(symbol: string): Instrument | null {

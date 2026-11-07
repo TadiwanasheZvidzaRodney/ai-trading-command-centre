@@ -33,19 +33,26 @@ export class RiskEngine {
 
   constructor(config: RiskEngineConfig) {
     this.riskConfig = config.riskConfig;
-    this.instruments = new Map(Object.entries(config.instruments));
+    this.instruments = new Map(
+      Object.entries(config.instruments) as Array<[InstrumentSymbol, InstrumentData]>,
+    );
     this.rrCalculator = new RewardRiskCalculator(
       config.riskConfig.minRewardRisk,
       this.getInstrument('XAU/USD').pipSize, // Use XAU as reference
     );
     this.limitChecker = new LimitChecker();
 
-    // Initialize position sizing calculators for each instrument
+    // Initialize position sizing calculators for each instrument.
+    // Pip value per lot for a USD-quoted instrument is contractSize × pipSize.
     this.positionSizing = new Map();
     for (const [symbol, data] of this.instruments) {
       this.positionSizing.set(
         symbol,
-        new PositionSizingCalculator(data.pipSize, data.contractSize, data.pipSize),
+        new PositionSizingCalculator(
+          data.contractSize * data.pipSize,
+          data.contractSize,
+          data.pipSize,
+        ),
       );
     }
   }
@@ -83,6 +90,18 @@ export class RiskEngine {
       reasons.push(`Risk amount: $${positionSize.riskAmount.toFixed(2)}`);
       reasons.push(`Reward-to-risk: ${positionSize.rewardRisk.toFixed(2)}`);
 
+      // Step 1b. Leverage / notional exposure limit.
+      const maxLeverage = this.riskConfig.maxLeverage ?? 30;
+      const leverage = positionSize.notionalUSD / tradePlan.accountEquity;
+      const leverageOk = leverage <= maxLeverage;
+      if (leverageOk) {
+        reasons.push(`Leverage ${leverage.toFixed(1)}x is within ${maxLeverage}x limit`);
+      } else {
+        reasons.push(
+          `Leverage ${leverage.toFixed(1)}x exceeds limit of ${maxLeverage}x`,
+        );
+      }
+
       // Step 2: Validate R:R ratio
       const rrValidation = this.rrCalculator.validate(
         tradePlan.entry,
@@ -113,7 +132,7 @@ export class RiskEngine {
       warnings.push(...limitCheck.warnings);
 
       // Final decision
-      const approved = limitCheck.allOk && rrValidation.valid;
+      const approved = limitCheck.allOk && rrValidation.valid && leverageOk;
 
       if (approved) {
         reasons.push('✓ Trade plan approved - all checks passed');

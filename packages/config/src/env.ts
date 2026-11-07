@@ -118,6 +118,10 @@ export const envSchema = z
     PAPER_MAX_OPEN_RISK_PCT: z.coerce.number().min(0.1).max(100).default(5),
     PAPER_MAX_POSITIONS: z.coerce.number().int().min(1).max(50).default(3),
     PAPER_MIN_RR: z.coerce.number().min(0.1).max(20).default(1.5),
+    PAPER_MAX_LEVERAGE: z.coerce.number().min(1).max(200).default(30),
+    PAPER_COMMISSION_PER_LOT: z.coerce.number().nonnegative().max(1000).default(7),
+    PAPER_SLIPPAGE_PIPS: z.coerce.number().nonnegative().max(500).default(0.2),
+    PAPER_EVAL_INTERVAL_SECONDS: z.coerce.number().int().min(10).max(3600).default(60),
   })
   .superRefine((env, ctx) => {
     if (env.NODE_ENV === 'production') {

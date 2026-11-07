@@ -51,8 +51,10 @@ export function AppShell({ children }: { children: React.ReactNode }) {
     setMobileMenuOpen(false);
   }, []);
 
-  // Close menu on pathname change
+  // Close menu on pathname change. Resetting transient UI state when the route
+  // changes is intentional here; it is not derived render output.
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMobileMenuOpen(false);
   }, [pathname]);
 

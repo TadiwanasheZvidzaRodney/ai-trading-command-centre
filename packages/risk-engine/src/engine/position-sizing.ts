@@ -1,12 +1,12 @@
 import Decimal from 'decimal.js';
-import type { InstrumentSymbol, OrderSide } from '@atc/shared';
+import type { OrderSide } from '@atc/shared';
 import type { PositionSizeOutput } from '../types.js';
 
 /**
  * Calculate position size in lots based on risk percentage.
- * 
- * Formula: Position Size (lots) = (Account Equity × Risk %) / (Entry - Stop) × (Pip Size / Pip Value)
- * 
+ *
+ * Formula: Position Size (lots) = (Account Equity × Risk %) / (Stop Distance in pips × Pip Value per lot)
+ *
  * This is deterministic: same inputs always produce the same output.
  * No randomness, no external dependencies.
  */
@@ -29,13 +29,6 @@ export class PositionSizingCalculator {
 
   /**
    * Calculate position size in lots from risk percentage.
-   * 
-   * @param accountEquity Current account equity in USD
-   * @param riskPerTradePct Risk as percentage (e.g., 1 for 1%)
-   * @param entry Entry price
-   * @param stop Stop loss price
-   * @param side Buy or sell (determines stop distance calculation)
-   * @returns Position size in lots
    */
   calculateLots(
     accountEquity: number,
@@ -64,14 +57,14 @@ export class PositionSizingCalculator {
     const distance = Math.abs(entry - stop);
     const distanceInPips = new Decimal(distance).div(this.pipSize);
 
-    // Calculate pips value per lot
-    const pipValuePerLot = new Decimal(this.pipValuePerLot);
-
     // Position size = Risk Amount / (Distance in Pips × Pip Value per Lot)
-    const positionSizeLots = riskAmount.div(distanceInPips.times(pipValuePerLot));
+    const positionSizeLots = riskAmount.div(
+      distanceInPips.times(this.pipValuePerLot),
+    );
 
-    // Return as number, rounded to 2 decimals
-    return Number(positionSizeLots.toFixed(2));
+    // Round to the nearest minimum lot (0.01). Sizes below the minimum are
+    // reported at the minimum so the caller can decide whether to reject.
+    return Math.max(0.01, Number(positionSizeLots.toFixed(2)));
   }
 
   /**
@@ -87,14 +80,19 @@ export class PositionSizingCalculator {
   ): PositionSizeOutput {
     const quantityLots = this.calculateLots(accountEquity, riskPerTradePct, entry, stop, side);
 
-    // Calculate risk and reward amounts
     const stopDistance = Math.abs(entry - stop);
-    const riskAmount = new Decimal(stopDistance).times(this.pipSize).times(quantityLots).times(this.pipValuePerLot);
-
     const targetDistance = Math.abs(target - entry);
-    const rewardAmount = new Decimal(targetDistance).times(this.pipSize).times(quantityLots).times(this.pipValuePerLot);
 
-    const rewardRisk = rewardAmount.div(riskAmount);
+    // Risk/reward are expressed in USD using the pip value per lot.
+    const stopPips = new Decimal(stopDistance).div(this.pipSize);
+    const targetPips = new Decimal(targetDistance).div(this.pipSize);
+
+    const riskAmount = stopPips.times(this.pipValuePerLot).times(quantityLots);
+    const rewardAmount = targetPips.times(this.pipValuePerLot).times(quantityLots);
+
+    const rewardRisk = riskAmount.eq(0)
+      ? new Decimal(0)
+      : rewardAmount.div(riskAmount);
 
     // Notional value
     const notionalUSD = new Decimal(entry).times(this.contractSize).times(quantityLots);

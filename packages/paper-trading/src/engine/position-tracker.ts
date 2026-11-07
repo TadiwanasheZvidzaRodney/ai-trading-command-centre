@@ -1,4 +1,4 @@
-import { v4 as uuidv4 } from 'crypto';
+import { randomUUID } from 'node:crypto';
 import Decimal from 'decimal.js';
 import type { InstrumentSymbol, OrderSide } from '@atc/shared';
 import type { PaperPosition, PaperOrder, ClosedTrade, ClosureResult } from '../types.js';
@@ -24,7 +24,7 @@ export class PositionTracker {
       throw new Error('Order must be filled to open position');
     }
 
-    const id = uuidv4();
+    const id = randomUUID();
     const position: PaperPosition = {
       id,
       orderId: order.id,
@@ -117,7 +117,7 @@ export class PositionTracker {
     const durationMs = new Date(timestamp).getTime() - new Date(position.openedAt).getTime();
 
     const closedTrade: ClosedTrade = {
-      id: uuidv4(),
+      id: randomUUID(),
       orderId: position.orderId,
       instrument: position.instrument,
       side: position.side,

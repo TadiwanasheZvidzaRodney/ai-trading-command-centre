@@ -47,7 +47,7 @@ export const riskValidationResultSchema = z.object({
   limitCheck: limitCheckResultSchema,
   reasons: z.array(z.string()),
   warnings: z.array(z.string()),
-  inputsUsed: z.record(z.unknown()),
+  inputsUsed: z.record(z.string(), z.unknown()),
   computedAt: z.string().datetime(),
 });
 

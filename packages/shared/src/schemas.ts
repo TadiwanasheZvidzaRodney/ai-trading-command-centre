@@ -163,6 +163,7 @@ export const riskConfigSchema = z.object({
   }),
   eventBlackoutMinutes: z.number().int().min(0).max(240).default(30),
   killSwitch: z.boolean().default(false),
+  maxLeverage: z.number().min(1).max(200).default(30),
 });
 
 export const tradePlanRequestSchema = z.object({
