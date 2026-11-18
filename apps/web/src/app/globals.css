@@ -164,16 +164,6 @@ ul {
   color: var(--accent);
 }
 
-.nav-phase {
-  margin-left: auto;
-  padding: 1px 5px;
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  color: var(--text-dim);
-  font-family: var(--font-mono);
-  font-size: 9.5px;
-}
-
 .sidebar-footer {
   margin-top: auto;
   padding: 12px 10px 0;
@@ -1827,10 +1817,6 @@ td strong {
 
   .nav-item {
     white-space: nowrap;
-  }
-
-  .nav-phase {
-    display: none;
   }
 
   .sidebar-footer {

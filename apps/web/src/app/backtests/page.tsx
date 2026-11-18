@@ -312,7 +312,7 @@ export default function BacktestsPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 8 · Backtesting</span>
+          <span className="pill accent">Backtesting</span>
           <h2>Test a strategy before trusting it.</h2>
           <p>
             Event-driven evaluation with next-bar entries, spread, commission and slippage costs,

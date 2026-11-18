@@ -20,7 +20,7 @@ export default function CopilotPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 6 · AI Copilot</span>
+          <span className="pill accent">AI Copilot</span>
           <h2>AI-powered technical analysis and trade idea generation.</h2>
           <p>
             Synthesize technical indicators, market structure, patterns, and macro events into

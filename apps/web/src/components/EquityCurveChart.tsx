@@ -84,9 +84,6 @@ export function EquityCurveChart({ account, isLoading }: EquityCurveChartProps) 
             </div>
           </div>
 
-          <div style={{ fontSize: '11px', color: 'var(--text-dim)', marginTop: '8px' }}>
-            ℹ️ Full equity curve with trade-by-trade P&L will be available in Phase 8
-          </div>
         </div>
       </div>
     </div>
