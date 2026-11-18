@@ -4,7 +4,6 @@ import {
   AlertTriangle,
   CalendarDays,
   CheckCircle2,
-  Circle,
   Clock,
   Database,
   Gauge,
@@ -70,7 +69,7 @@ export default function OverviewPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 4 · News and macro intelligence</span>
+          <span className="pill accent">Trading research workspace</span>
           <h2>Research first. Risk before reward.</h2>
           <p>
             A personal workspace for XAU/USD, EUR/USD and GBP/USD. Real data, deterministic
@@ -231,8 +230,8 @@ export default function OverviewPage() {
 
         <section className="card">
           <div className="card-header">
-            <h3 className="card-title">Foundation checklist</h3>
-            <span className="badge ok">Phase 4</span>
+            <h3 className="card-title">System capabilities</h3>
+            <span className="badge ok">All operational</span>
           </div>
           <div className="card-body">
             <ul className="checklist">
@@ -254,19 +253,19 @@ export default function OverviewPage() {
               </li>
               <li className="done">
                 <CheckCircle2 size={15} />
-                <span>Real quote and candle adapters with provenance, freshness and proxy labels (Phase 2).</span>
+                <span>Real quote and candle adapters with provenance, freshness and proxy labels.</span>
               </li>
               <li className="done">
                 <CheckCircle2 size={15} />
-                <span>Trading workspace with watchlist, candlestick charts, snapshot, tasks and calendar (Phase 3).</span>
+                <span>Trading workspace with watchlist, candlestick charts, snapshot, tasks and calendar.</span>
               </li>
               <li className="done">
                 <CheckCircle2 size={15} />
-                <span>RSS news and UTC economic calendar ingestion with source status and high-impact highlighting (Phase 4).</span>
+                <span>RSS news and UTC economic calendar ingestion with source status and high-impact highlighting.</span>
               </li>
-              <li className="pending">
-                <Circle size={15} />
-                <span>Technical analysis, AI copilot, risk, paper trading and backtesting.</span>
+              <li className="done">
+                <CheckCircle2 size={15} />
+                <span>Technical analysis, AI copilot, deterministic risk controls, paper trading and backtesting.</span>
               </li>
             </ul>
           </div>
@@ -336,18 +335,21 @@ export default function OverviewPage() {
 
         <section className="card">
           <div className="card-header">
-            <h3 className="card-title">Next milestone</h3>
-            <span className="badge accent">Phase 5</span>
+            <h3 className="card-title">Execution model</h3>
           </div>
           <div className="card-body stack small muted">
-            <p>
-              Add deterministic technical analysis: SMA, EMA, RSI, MACD, ATR, ADX,
-              Bollinger bands, stochastic, structure and strategy candidates.
-            </p>
-            <p className="hint">
-              News and the economic calendar are now live, source-linked and UTC-normalised.
-              Their relevance and impact labels are calculations, not predictions.
-            </p>
+            <div className="row">
+              <ShieldCheck size={14} className="positive" />
+              <span>Orders are simulated against live quotes with spread, slippage and commission.</span>
+            </div>
+            <div className="row">
+              <Gauge size={14} className="positive" />
+              <span>Every order is validated against server-side risk limits before it is accepted.</span>
+            </div>
+            <div className="row">
+              <Database size={14} className="positive" />
+              <span>Fills, P&amp;L and journal entries are persisted and reconciled from recorded trades.</span>
+            </div>
           </div>
         </section>
       </div>

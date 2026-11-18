@@ -52,7 +52,7 @@ export default function AnalysisPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 5 · Technical Analysis</span>
+          <span className="pill accent">Technical Analysis</span>
           <h2>Multi-timeframe technical analysis with indicators and patterns.</h2>
           <p>
             Real-time chart overlays with SMA 20/50, EMA 9, RSI, MACD, ATR, Bollinger Bands and

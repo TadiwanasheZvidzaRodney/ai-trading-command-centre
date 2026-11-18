@@ -29,7 +29,7 @@ export default function JournalPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 7 · Trade Journal</span>
+          <span className="pill accent">Trade Journal</span>
           <h2>Review closed trades and performance analytics.</h2>
           <p>
             Analyze your trading performance with detailed metrics, win rate, profit factor, drawdown analysis,

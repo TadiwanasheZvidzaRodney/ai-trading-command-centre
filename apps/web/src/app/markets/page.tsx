@@ -221,7 +221,7 @@ function Snapshot({ summary, precision }: { summary: MarketSummary; precision: n
       </div>
       <p className="hint snapshot-note">
         Derived deterministically from the provider candles shown. This is a factual
-        snapshot, not a recommendation. Full indicator and strategy work arrives in Phase 5.
+        snapshot, not a recommendation.
       </p>
     </div>
   );
@@ -371,7 +371,7 @@ export default function MarketsPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 3 · Trading workspace</span>
+          <span className="pill accent">Trading workspace</span>
           <h2>Watchlist, chart and provenance in one view.</h2>
           <p>
             Free-tier reference data for XAU/USD, EUR/USD and GBP/USD. Every price and candle

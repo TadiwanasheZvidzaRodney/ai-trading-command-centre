@@ -111,7 +111,7 @@ export default function NewsPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 4 · News and macro intelligence</span>
+          <span className="pill accent">News and macro intelligence</span>
           <h2>Source-linked headlines, tagged deterministically.</h2>
           <p>
             Public RSS feeds are deduplicated and tagged by currency and instrument. A
