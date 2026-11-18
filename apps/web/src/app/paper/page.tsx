@@ -81,7 +81,7 @@ export default function PaperPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 7 · Paper Trading</span>
+          <span className="pill accent">Paper Trading</span>
           <h2>Manage paper trading positions and real-time P&L.</h2>
           <p>
             View your account summary, open positions, and pending orders. Monitor unrealized P&L in real-time

@@ -180,7 +180,7 @@ export default function PlannerPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 7 · Trade Planner</span>
+          <span className="pill accent">Trade Planner</span>
           <h2>Plan trades with deterministic risk calculations.</h2>
           <p>
             Enter your entry, stop, and target prices. The system calculates optimal position size,

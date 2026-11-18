@@ -148,7 +148,7 @@ export default function CalendarPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 4 · News and macro intelligence</span>
+          <span className="pill accent">News and macro intelligence</span>
           <h2>Economic calendar, normalised to UTC.</h2>
           <p>
             The current week of USD, EUR and GBP events from a community mirror of Forex
