@@ -204,7 +204,7 @@ export default function TasksPage() {
     <div className="page">
       <section className="hero">
         <div>
-          <span className="pill accent">Phase 3 · Trading workspace</span>
+          <span className="pill accent">Trade preparation</span>
           <h2>Preparation tasks and reminders.</h2>
           <p>
             Track pre-trade checks, news reviews and end-of-day tasks. Tasks are stored in

@@ -23,18 +23,18 @@ import { useCallback, useEffect, useState } from 'react';
 import { useAuthStatus, useHealth } from '@/lib/hooks';
 
 const NAV_ITEMS = [
-  { href: '/', label: 'Overview', icon: LayoutDashboard, phase: 1 },
-  { href: '/markets', label: 'Markets', icon: LineChart, phase: 3 },
-  { href: '/news', label: 'News', icon: Newspaper, phase: 4 },
-  { href: '/calendar', label: 'Calendar', icon: CalendarDays, phase: 4 },
-  { href: '/analysis', label: 'Analysis', icon: FlaskConical, phase: 5 },
-  { href: '/copilot', label: 'AI Copilot', icon: Activity, phase: 6 },
-  { href: '/planner', label: 'Planner', icon: Gauge, phase: 7 },
-  { href: '/paper', label: 'Paper trading', icon: BarChart3, phase: 7 },
-  { href: '/journal', label: 'Journal', icon: BookOpen, phase: 7 },
-  { href: '/backtests', label: 'Backtests', icon: ClipboardList, phase: 8 },
-  { href: '/tasks', label: 'Tasks', icon: ListChecks, phase: 3 },
-  { href: '/settings', label: 'Settings', icon: Settings, phase: 9 },
+  { href: '/', label: 'Overview', icon: LayoutDashboard },
+  { href: '/markets', label: 'Markets', icon: LineChart },
+  { href: '/news', label: 'News', icon: Newspaper },
+  { href: '/calendar', label: 'Calendar', icon: CalendarDays },
+  { href: '/analysis', label: 'Analysis', icon: FlaskConical },
+  { href: '/copilot', label: 'AI Copilot', icon: Activity },
+  { href: '/planner', label: 'Planner', icon: Gauge },
+  { href: '/paper', label: 'Paper trading', icon: BarChart3 },
+  { href: '/journal', label: 'Journal', icon: BookOpen },
+  { href: '/backtests', label: 'Backtests', icon: ClipboardList },
+  { href: '/tasks', label: 'Tasks', icon: ListChecks },
+  { href: '/settings', label: 'Settings', icon: Settings },
 ] as const;
 
 export function AppShell({ children }: { children: React.ReactNode }) {
@@ -147,7 +147,6 @@ export function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <Icon size={16} strokeWidth={1.9} />
                 <span>{item.label}</span>
-                {item.phase > 1 && <span className="nav-phase">P{item.phase}</span>}
               </Link>
             );
           })}
